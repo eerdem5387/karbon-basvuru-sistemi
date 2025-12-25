@@ -1083,12 +1083,9 @@ export default function HomePage() {
       setAnneMeslekSearch('')
       setOkulSearch('')
       setKvkkOnay(false)
-      setSelectedSube(null) // Şube seçimini sıfırla
-
-      // 5 saniye sonra success mesajını kaldır
-      setTimeout(() => {
-        setSubmitSuccess(false)
-      }, 5000)
+      // Sayfanın en üstüne scroll yap
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      // Şube seçimini sıfırlama - kullanıcı butona tıklayınca sıfırlanacak
     } catch (error) {
       // Hata objesi veya Error instance'ı kontrolü
       if (error && typeof error === 'object' && 'message' in error) {
@@ -1155,9 +1152,6 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
             className="text-center mb-12"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Hangi Şubemize Başvuru Yapmak İstersiniz?
-            </h2>
             <p className="text-lg text-gray-600">
               Lütfen başvuru yapmak istediğiniz şubeyi seçiniz
             </p>
@@ -1364,15 +1358,26 @@ export default function HomePage() {
                   </svg>
                 </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Başvurunuz Başarıyla Alındı!</h3>
-              <p className="text-gray-600 mb-6">
-                Başvurunuz sisteme kaydedilmiştir. Teşekkür ederiz.
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">🎉 Başvurunuz Başarıyla Alındı!</h3>
+              <p className="text-gray-600 mb-4">
+                Başvurunuz sisteme kaydedilmiştir. En kısa sürede sizinle iletişime geçilecektir.
               </p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-green-800 font-medium">
+                  ✅ Başvuru numaranız kayıt altına alınmıştır.
+                </p>
+                <p className="text-sm text-green-700 mt-2">
+                  E-posta adresinize bilgilendirme mesajı gönderilecektir.
+                </p>
+              </div>
               <button
-                onClick={() => setSubmitSuccess(false)}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition duration-200"
+                onClick={() => {
+                  setSubmitSuccess(false)
+                  setSelectedSube(null) // Şube seçimine dön
+                }}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl"
               >
-                Tamam
+                Yeni Başvuru Yap
               </button>
             </motion.div>
         </div>
