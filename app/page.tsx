@@ -899,6 +899,7 @@ const meslekler = [
   'Ebe',
   'Eczacı',
   'Eğitmen',
+  'Emekli',
   'Ekspresyonist',
   'Elektrik Elektronik Mühendisi',
   'Elektrik Teknisyeni',
