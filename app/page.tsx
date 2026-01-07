@@ -601,7 +601,7 @@ const trabzonOkullari = [
   'TRABZON - MERKEZ - Özel Ana Sınav Temel Lisesi',
   'TRABZON - MERKEZ - Özel Bahçeşehir Koleji Trabzon Kampüsü',
   'TRABZON - MERKEZ - Özel Düşünür Koleji Trabzon Ortaokulu',
-  'TRABZON - MERKEZ - Özel İlke Birey Temel Lisesi',
+  'TRABZON - MERKEZ - Özel İlke Birey Okulları',
   'TRABZON - MERKEZ - Özel İpekyolu Ortaokulu',
   'TRABZON - MERKEZ - Özel Kuzey Okulları Mesleki ve Teknik Anadolu Lisesi',
   'TRABZON - MERKEZ - Özel Net Anadolu Lisesi',
