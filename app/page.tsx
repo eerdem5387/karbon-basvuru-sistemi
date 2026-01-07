@@ -598,6 +598,22 @@ const trabzonOkullari = [
   'TRABZON - YOMRA - Yomra Anadolu Lisesi',
   'TRABZON - YOMRA - Yomra Halk Eğitimi Merkezi',
   'TRABZON - YOMRA - Yomra Özel Eğitim Anaokulu',
+  'TRABZON - MERKEZ - Özel Ana Sınav Temel Lisesi',
+  'TRABZON - MERKEZ - Özel Bahçeşehir Koleji Trabzon Kampüsü',
+  'TRABZON - MERKEZ - Özel Düşünür Koleji Trabzon Ortaokulu',
+  'TRABZON - MERKEZ - Özel İlke Birey Temel Lisesi',
+  'TRABZON - MERKEZ - Özel İpekyolu Ortaokulu',
+  'TRABZON - MERKEZ - Özel Kuzey Okulları Mesleki ve Teknik Anadolu Lisesi',
+  'TRABZON - MERKEZ - Özel Net Anadolu Lisesi',
+  'TRABZON - MERKEZ - Özel Net Fen Lisesi',
+  'TRABZON - MERKEZ - Özel TED Koleji Trabzon Kampüsü',
+  'TRABZON - MERKEZ - Özel Trabzon Doğa Koleji',
+  'TRABZON - MERKEZ - Özel Trabzon Mektebim Anadolu Lisesi',
+  'TRABZON - MERKEZ - Özel Trabzon Mektebim Ortaokulu',
+  'TRABZON - AKÇAABAT - Özel Akçaabat Sınav Anadolu Lisesi',
+  'TRABZON - AKÇAABAT - Özel Akçaabat Sınav Fen Lisesi',
+  'TRABZON - AKÇAABAT - Özel Akçaabat Uğur Mesleki ve Teknik Anadolu Lisesi',
+  'TRABZON - AKÇAABAT - Özel Trabzon Bil Temel Lisesi',
 ]
 
 // Rize okulları
@@ -871,6 +887,11 @@ const trabzonSiniflar = [
 ]
 
 const rizeSiniflar = [
+  '4. Sınıf',
+  '5. Sınıf',
+  '6. Sınıf',
+  '7. Sınıf',
+  '8. Sınıf',
   '9. Sınıf',
   '10. Sınıf',
   '11. Sınıf',
