@@ -1179,7 +1179,7 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 md:gap-8 max-w-4xl mx-auto">
             {/* Rize Şubesi */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -1188,9 +1188,9 @@ export default function HomePage() {
               onClick={() => setSelectedSube('Rize')}
               className="group cursor-pointer"
             >
-              <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-4 border-transparent hover:border-green-500">
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-3 sm:p-6 md:p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 sm:border-4 border-transparent hover:border-green-500">
                 <div className="text-center">
-                  <div className="mx-auto mb-6 h-32 w-32 flex items-center justify-center">
+                  <div className="mx-auto mb-2 sm:mb-4 md:mb-6 h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 flex items-center justify-center">
                     <Image 
                       src="/logo.png" 
                       alt="Karbon Kurs Plus Logo" 
@@ -1199,18 +1199,18 @@ export default function HomePage() {
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-green-600 transition-colors">
+                  <h3 className="text-xs sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 md:mb-3 group-hover:text-green-600 transition-colors">
                     Karbon Kurs Plus
                   </h3>
-                  <h4 className="text-4xl font-extrabold text-green-600 mb-4">
+                  <h4 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-green-600 mb-2 sm:mb-3 md:mb-4">
                     RİZE
                   </h4>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-[10px] sm:text-sm md:text-base text-gray-600 mb-2 sm:mb-4 md:mb-6 hidden sm:block">
                     Rize şubemize bursluluk sınavı başvurusu yapmak için tıklayın
                   </p>
-                  <div className="inline-flex items-center text-green-600 font-semibold group-hover:gap-3 gap-2 transition-all">
-                    <span>Başvuru Yap</span>
-                    <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="inline-flex items-center text-green-600 font-semibold text-xs sm:text-sm md:text-base group-hover:gap-3 gap-1 sm:gap-2 transition-all">
+                    <span>Başvuru</span>
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
@@ -1226,9 +1226,9 @@ export default function HomePage() {
               onClick={() => setSelectedSube('Trabzon')}
               className="group cursor-pointer"
             >
-              <div className="bg-white rounded-2xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-4 border-transparent hover:border-blue-500">
+              <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-3 sm:p-6 md:p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 border-2 sm:border-4 border-transparent hover:border-blue-500">
                 <div className="text-center">
-                  <div className="mx-auto mb-6 h-32 w-32 flex items-center justify-center">
+                  <div className="mx-auto mb-2 sm:mb-4 md:mb-6 h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 flex items-center justify-center">
                     <Image 
                       src="/logo.png" 
                       alt="Karbon Kurs Plus Logo" 
@@ -1237,18 +1237,18 @@ export default function HomePage() {
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-xs sm:text-lg md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 md:mb-3 group-hover:text-blue-600 transition-colors">
                     Karbon Kurs Plus
                   </h3>
-                  <h4 className="text-4xl font-extrabold text-blue-600 mb-4">
+                  <h4 className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-extrabold text-blue-600 mb-2 sm:mb-3 md:mb-4">
                     TRABZON
                   </h4>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-[10px] sm:text-sm md:text-base text-gray-600 mb-2 sm:mb-4 md:mb-6 hidden sm:block">
                     Trabzon şubemize bursluluk sınavı başvurusu yapmak için tıklayın
                   </p>
-                  <div className="inline-flex items-center text-blue-600 font-semibold group-hover:gap-3 gap-2 transition-all">
-                    <span>Başvuru Yap</span>
-                    <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="inline-flex items-center text-blue-600 font-semibold text-xs sm:text-sm md:text-base group-hover:gap-3 gap-1 sm:gap-2 transition-all">
+                    <span>Başvuru</span>
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>
