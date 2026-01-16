@@ -32,10 +32,52 @@ export async function GET() {
     console.log('[Admin API] Toplam başvuru:', toplamBasvuru)
     
     // Tüm başvuruları çek (güvenli yaklaşım)
+    // Yeni kolonlar henüz production'da yoksa hata vermemesi için select kullan
     const tumBasvurular = await prisma.basvuru.findMany({
+      select: {
+        id: true,
+        ogrenciAdSoyad: true,
+        ogrenciTc: true,
+        okul: true,
+        ogrenciSinifi: true,
+        ogrenciSube: true,
+        kurumSube: true,
+        sinavGunu: true,
+        babaAdSoyad: true,
+        babaMeslek: true,
+        babaIsAdresi: true,
+        babaCepTel: true,
+        anneAdSoyad: true,
+        anneMeslek: true,
+        anneIsAdresi: true,
+        anneCepTel: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+        // Yeni alanlar (varsa)
+        sinavSecimi: true,
+        sinavSaati: true,
+        siraNumarasi: true,
+        oturum: true,
+        sinavSalonu: true,
+        sinavAdresi: true,
+        sinavTarihi: true,
+        digerNotlar: true,
+      },
       orderBy: {
         createdAt: 'desc'
       }
+    }).catch(async (error) => {
+      // Eğer yeni kolonlar yoksa, sadece eski kolonları çek
+      if (error.code === 'P2022') {
+        console.log('[Admin API] Yeni kolonlar yok, eski kolonlarla devam ediliyor')
+        return await prisma.basvuru.findMany({
+          orderBy: {
+            createdAt: 'desc'
+          }
+        })
+      }
+      throw error
     })
     
     console.log('[Admin API] Tüm başvuru sayısı:', tumBasvurular.length)
