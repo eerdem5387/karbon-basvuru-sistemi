@@ -16,6 +16,16 @@ model Basvuru {
   ogrenciSube      String   @default("Belirtilmedi")
   kurumSube        String   @default("Rize")
   sinavGunu        String   @default("Belirtilmedi")
+  // Rize için sınav seçimi
+  sinavSecimi      String?  // Sadece Rize için kullanılacak
+  // Sınav giriş belgesi bilgileri (sadece Rize için)
+  sinavSaati       String?
+  siraNumarasi     String?
+  oturum           String?
+  sinavSalonu      String?
+  sinavAdresi      String?
+  sinavTarihi      String?
+  digerNotlar      String?
   babaAdSoyad      String
   babaMeslek       String
   babaIsAdresi     String   @default("")

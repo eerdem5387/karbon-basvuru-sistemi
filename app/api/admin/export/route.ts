@@ -63,6 +63,17 @@ export async function GET(request: Request) {
       'TC Kimlik No': b.ogrenciTc,
       'Okul': b.okul,
       'Sınıf': b.ogrenciSinifi,
+      // Rize için sınav bilgileri
+      ...(b.kurumSube === 'Rize' && {
+        'Sınav Seçimi': b.sinavSecimi || '-',
+        'Sınav Tarihi': b.sinavTarihi || '-',
+        'Sınav Saati': b.sinavSaati || '-',
+        'Sıra Numarası': b.siraNumarasi || '-',
+        'Oturum': b.oturum || '-',
+        'Sınav Salonu': b.sinavSalonu || '-',
+        'Sınav Adresi': b.sinavAdresi || '-',
+        'Diğer Notlar': b.digerNotlar || '-',
+      }),
       'Baba Ad Soyad': b.babaAdSoyad,
       'Baba Meslek': b.babaMeslek,
       'Baba İş Adresi': b.babaIsAdresi || '-',
