@@ -25,9 +25,18 @@ export async function GET(request: Request) {
     // Admin kullanıcısının şubesine göre filtreleme
     const kurumSube = session.user.kurumSube
 
-    // Filtreleme için where koşulları
+    // Filtreleme için where koşulları - eski başvuruları da dahil et
     const where: Prisma.BasvuruWhereInput = {
-      kurumSube: kurumSube
+      OR: [
+        { kurumSube: kurumSube },
+        // Eski başvurular için: okul adına göre otomatik tespit
+        {
+          okul: {
+            contains: kurumSube === 'Rize' ? 'RİZE' : 'TRABZON',
+            mode: 'insensitive'
+          }
+        }
+      ]
     }
 
     if (tarihBaslangic || tarihBitis) {

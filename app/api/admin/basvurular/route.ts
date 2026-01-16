@@ -16,14 +16,48 @@ export async function GET() {
     // Admin kullanıcısının şubesine göre başvuruları filtrele
     const kurumSube = session.user.kurumSube
     
+    // Eski başvurular için: kurumSube eşleşmese bile okul adına göre göster
     const basvurular = await prisma.basvuru.findMany({
       where: {
-        kurumSube: kurumSube
+        OR: [
+          { kurumSube: kurumSube },
+          // Eski başvurular için: okul adına göre otomatik tespit
+          {
+            okul: {
+              contains: kurumSube === 'Rize' ? 'RİZE' : 'TRABZON',
+              mode: 'insensitive'
+            }
+          }
+        ]
       },
       orderBy: {
         createdAt: 'desc'
       }
     })
+    
+    // Eski başvuruların kurumSube değerini güncelle (asenkron, kullanıcıyı bekletme)
+    const guncellenecekBasvurular = basvurular.filter(b => 
+      !b.kurumSube || b.kurumSube === '' || b.kurumSube === 'Belirtilmedi'
+    )
+    
+    if (guncellenecekBasvurular.length > 0) {
+      // Arka planda güncelle, kullanıcıyı bekletme
+      Promise.all(
+        guncellenecekBasvurular.map(async (basvuru) => {
+          const okulAdi = basvuru.okul.toUpperCase()
+          const yeniKurumSube = okulAdi.includes('RİZE') ? 'Rize' : okulAdi.includes('TRABZON') ? 'Trabzon' : kurumSube
+          
+          return prisma.basvuru.update({
+            where: { id: basvuru.id },
+            data: { kurumSube: yeniKurumSube }
+          }).catch(() => {
+            // Hata olsa bile devam et
+          })
+        })
+      ).catch(() => {
+        // Toplu güncelleme hatası - logla ama kullanıcıya gösterme
+      })
+    }
     
     return NextResponse.json(basvurular)
   } catch (error) {
