@@ -31,43 +31,30 @@ export async function GET() {
     const toplamBasvuru = await prisma.basvuru.count()
     console.log('[Admin API] Toplam başvuru:', toplamBasvuru)
     
-    // Eski başvurular için: kurumSube eşleşmese bile okul adına göre göster
+    // Tüm başvuruları çek (güvenli yaklaşım)
+    const tumBasvurular = await prisma.basvuru.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+    
+    console.log('[Admin API] Tüm başvuru sayısı:', tumBasvurular.length)
+    
+    // JavaScript'te filtrele (daha güvenli)
     const okulArama = kurumSube === 'Rize' ? 'RİZE' : 'TRABZON'
-    
-    // Önce kurumSube'ye göre filtrele
-    const kurumSubeBasvurular = await prisma.basvuru.findMany({
-      where: {
-        kurumSube: kurumSube
-      },
-      orderBy: {
-        createdAt: 'desc'
+    const basvurular = tumBasvurular.filter(b => {
+      // KurumSube eşleşiyorsa göster
+      if (b.kurumSube === kurumSube) {
+        return true
       }
+      // Okul adında şube adı geçiyorsa göster (eski başvurular için)
+      if (b.okul && b.okul.toUpperCase().includes(okulArama)) {
+        return true
+      }
+      return false
     })
     
-    // Okul adına göre de ara (eski başvurular için)
-    const okulBasvurular = await prisma.basvuru.findMany({
-      where: {
-        okul: {
-          contains: okulArama
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-    
-    // Birleştir ve tekrarları kaldır
-    const birlesik = [...kurumSubeBasvurular, ...okulBasvurular]
-    const uniqueMap = new Map()
-    birlesik.forEach(b => {
-      if (!uniqueMap.has(b.id)) {
-        uniqueMap.set(b.id, b)
-      }
-    })
-    const basvurular = Array.from(uniqueMap.values())
-    
-    // Tarihe göre sırala
-    basvurular.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    console.log('[Admin API] Filtrelenmiş başvuru sayısı:', basvurular.length)
     
     console.log('[Admin API] Filtrelenmiş başvuru sayısı:', basvurular.length)
     
