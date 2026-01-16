@@ -6,7 +6,8 @@ export async function GET() {
   try {
     const session = await auth()
     
-    if (!session) {
+    if (!session || !session.user) {
+      console.error('[Admin API] Session yok veya user yok')
       return NextResponse.json(
         { error: "Yetkisiz erişim" },
         { status: 401 }
@@ -16,24 +17,59 @@ export async function GET() {
     // Admin kullanıcısının şubesine göre başvuruları filtrele
     const kurumSube = session.user.kurumSube
     
+    if (!kurumSube) {
+      console.error('[Admin API] kurumSube yok:', session.user)
+      return NextResponse.json(
+        { error: "Kurum şubesi bilgisi bulunamadı" },
+        { status: 500 }
+      )
+    }
+    
+    console.log('[Admin API] Kurum Şube:', kurumSube)
+    
+    // Önce tüm başvuruları say
+    const toplamBasvuru = await prisma.basvuru.count()
+    console.log('[Admin API] Toplam başvuru:', toplamBasvuru)
+    
     // Eski başvurular için: kurumSube eşleşmese bile okul adına göre göster
-    const basvurular = await prisma.basvuru.findMany({
+    const okulArama = kurumSube === 'Rize' ? 'RİZE' : 'TRABZON'
+    
+    // Önce kurumSube'ye göre filtrele
+    const kurumSubeBasvurular = await prisma.basvuru.findMany({
       where: {
-        OR: [
-          { kurumSube: kurumSube },
-          // Eski başvurular için: okul adına göre otomatik tespit
-          {
-            okul: {
-              contains: kurumSube === 'Rize' ? 'RİZE' : 'TRABZON',
-              mode: 'insensitive'
-            }
-          }
-        ]
+        kurumSube: kurumSube
       },
       orderBy: {
         createdAt: 'desc'
       }
     })
+    
+    // Okul adına göre de ara (eski başvurular için)
+    const okulBasvurular = await prisma.basvuru.findMany({
+      where: {
+        okul: {
+          contains: okulArama
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+    
+    // Birleştir ve tekrarları kaldır
+    const birlesik = [...kurumSubeBasvurular, ...okulBasvurular]
+    const uniqueMap = new Map()
+    birlesik.forEach(b => {
+      if (!uniqueMap.has(b.id)) {
+        uniqueMap.set(b.id, b)
+      }
+    })
+    const basvurular = Array.from(uniqueMap.values())
+    
+    // Tarihe göre sırala
+    basvurular.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    
+    console.log('[Admin API] Filtrelenmiş başvuru sayısı:', basvurular.length)
     
     // Eski başvuruların kurumSube değerini güncelle (asenkron, kullanıcıyı bekletme)
     const guncellenecekBasvurular = basvurular.filter(b => 
@@ -62,6 +98,11 @@ export async function GET() {
     return NextResponse.json(basvurular)
   } catch (error) {
     console.error("Başvurular getirme hatası:", error)
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      error: JSON.stringify(error, null, 2)
+    })
     
     // Prisma connection errors
     if (error && typeof error === 'object' && 'code' in error) {
@@ -74,7 +115,10 @@ export async function GET() {
     }
     
     return NextResponse.json(
-      { error: "Başvurular getirilirken bir hata oluştu" },
+      { 
+        error: "Başvurular getirilirken bir hata oluştu",
+        details: error instanceof Error ? error.message : 'Bilinmeyen hata'
+      },
       { status: 500 }
     )
   }
