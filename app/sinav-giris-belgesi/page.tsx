@@ -50,10 +50,10 @@ export default function SinavGirisBelgesiPage() {
                 
                 body {
                   font-family: 'Montserrat', Arial, sans-serif;
-                  padding: 15px;
+                  padding: 20px;
                   background: white;
                   color: #111827;
-                  line-height: 1.4;
+                  line-height: 1.5;
                 }
                 
                 .belge-container {
@@ -64,8 +64,8 @@ export default function SinavGirisBelgesiPage() {
                 
                 .header {
                   text-align: center;
-                  margin-bottom: 20px;
-                  padding-bottom: 12px;
+                  margin-bottom: 25px;
+                  padding-bottom: 15px;
                   border-bottom: 2px solid #6366f1;
                 }
                 
@@ -73,13 +73,13 @@ export default function SinavGirisBelgesiPage() {
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  gap: 15px;
-                  margin-bottom: 5px;
+                  gap: 18px;
+                  margin-bottom: 8px;
                 }
                 
                 .logo-container {
-                  width: 60px;
-                  height: 60px;
+                  width: 70px;
+                  height: 70px;
                   flex-shrink: 0;
                 }
                 
@@ -90,97 +90,97 @@ export default function SinavGirisBelgesiPage() {
                 }
                 
                 .header-text h1 {
-                  font-size: 24px;
+                  font-size: 28px;
                   font-weight: 800;
                   color: #6366f1;
                   margin: 0;
                 }
                 
                 .header-text p {
-                  font-size: 14px;
+                  font-size: 16px;
                   color: #6b7280;
-                  margin: 3px 0 0 0;
+                  margin: 4px 0 0 0;
                 }
                 
                 .section {
-                  margin-bottom: 18px;
+                  margin-bottom: 22px;
                 }
                 
                 .section-title {
-                  font-size: 16px;
+                  font-size: 18px;
                   font-weight: 700;
                   color: #111827;
-                  margin-bottom: 12px;
-                  padding-bottom: 6px;
-                  border-bottom: 1px solid #e5e7eb;
+                  margin-bottom: 15px;
+                  padding-bottom: 8px;
+                  border-bottom: 2px solid #e5e7eb;
                 }
                 
                 .info-grid {
                   display: grid;
                   grid-template-columns: 1fr 1fr;
-                  gap: 12px;
-                  margin-bottom: 12px;
+                  gap: 16px;
+                  margin-bottom: 15px;
                 }
                 
                 .info-item {
-                  margin-bottom: 10px;
+                  margin-bottom: 12px;
                 }
                 
                 .info-label {
-                  font-size: 10px;
+                  font-size: 11px;
                   color: #6b7280;
-                  margin-bottom: 3px;
+                  margin-bottom: 5px;
                   text-transform: uppercase;
-                  letter-spacing: 0.3px;
+                  letter-spacing: 0.4px;
                 }
                 
                 .info-value {
-                  font-size: 13px;
+                  font-size: 15px;
                   font-weight: 600;
                   color: #111827;
                 }
                 
                 .info-value-large {
-                  font-size: 20px;
+                  font-size: 28px;
                   font-weight: 700;
                   color: #111827;
                 }
                 
                 .sinav-secimi-box {
                   background: #eef2ff;
-                  border: 1.5px solid #6366f1;
-                  border-radius: 6px;
-                  padding: 10px;
-                  margin-bottom: 12px;
+                  border: 2px solid #6366f1;
+                  border-radius: 8px;
+                  padding: 14px;
+                  margin-bottom: 18px;
                 }
                 
                 .sinav-secimi-label {
-                  font-size: 10px;
+                  font-size: 11px;
                   color: #4b5563;
-                  margin-bottom: 4px;
+                  margin-bottom: 6px;
                   text-transform: uppercase;
-                  letter-spacing: 0.3px;
+                  letter-spacing: 0.4px;
                 }
                 
                 .sinav-secimi-value {
-                  font-size: 12px;
+                  font-size: 14px;
                   font-weight: 600;
                   color: #1e40af;
-                  line-height: 1.4;
+                  line-height: 1.5;
                 }
                 
                 .warning-box {
                   background: #fef3c7;
-                  border: 1.5px solid #fbbf24;
-                  border-radius: 6px;
-                  padding: 10px;
-                  margin-top: 15px;
+                  border: 2px solid #fbbf24;
+                  border-radius: 8px;
+                  padding: 14px;
+                  margin-top: 20px;
                 }
                 
                 .warning-text {
-                  font-size: 11px;
+                  font-size: 12px;
                   color: #92400e;
-                  line-height: 1.5;
+                  line-height: 1.6;
                 }
                 
                 .warning-text strong {
@@ -193,7 +193,7 @@ export default function SinavGirisBelgesiPage() {
                 
                 @media print {
                   body {
-                    padding: 10px;
+                    padding: 15px;
                     margin: 0;
                   }
                   
@@ -203,22 +203,22 @@ export default function SinavGirisBelgesiPage() {
                   }
                   
                   .header {
-                    margin-bottom: 15px;
-                    padding-bottom: 10px;
+                    margin-bottom: 20px;
+                    padding-bottom: 12px;
                   }
                   
                   .section {
-                    margin-bottom: 15px;
+                    margin-bottom: 18px;
                     page-break-inside: avoid;
                   }
                   
                   .warning-box {
-                    margin-top: 12px;
+                    margin-top: 18px;
                     page-break-inside: avoid;
                   }
                   
                   @page {
-                    margin: 0.8cm;
+                    margin: 1cm;
                     size: A4;
                   }
                   
