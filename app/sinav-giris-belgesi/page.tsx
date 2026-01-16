@@ -27,33 +27,290 @@ export default function SinavGirisBelgesiPage() {
   const belgeRef = useRef<HTMLDivElement>(null)
 
   const handlePrint = () => {
-    if (belgeRef.current) {
+    if (belgeRef.current && belge) {
       const printWindow = window.open('', '_blank')
       if (printWindow) {
+        // Logo için base64 veya URL
+        const logoUrl = window.location.origin + '/logo.png'
+        
         printWindow.document.write(`
+          <!DOCTYPE html>
           <html>
             <head>
-              <title>Sınav Giriş Belgesi - ${belge?.ogrenciTc}</title>
+              <meta charset="UTF-8">
+              <title>Sınav Giriş Belgesi - ${belge.ogrenciTc}</title>
               <style>
-                body { font-family: Arial, sans-serif; padding: 20px; }
-                .print-hidden { display: none; }
+                @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+                
+                * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+                }
+                
+                body {
+                  font-family: 'Montserrat', Arial, sans-serif;
+                  padding: 40px;
+                  background: white;
+                  color: #111827;
+                  line-height: 1.6;
+                }
+                
+                .belge-container {
+                  max-width: 800px;
+                  margin: 0 auto;
+                  background: white;
+                }
+                
+                .header {
+                  text-align: center;
+                  margin-bottom: 40px;
+                  padding-bottom: 20px;
+                  border-bottom: 3px solid #6366f1;
+                }
+                
+                .header-content {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  gap: 20px;
+                  margin-bottom: 10px;
+                }
+                
+                .logo-container {
+                  width: 80px;
+                  height: 80px;
+                  flex-shrink: 0;
+                }
+                
+                .logo-container img {
+                  width: 100%;
+                  height: 100%;
+                  object-fit: contain;
+                }
+                
+                .header-text h1 {
+                  font-size: 32px;
+                  font-weight: 800;
+                  color: #6366f1;
+                  margin: 0;
+                }
+                
+                .header-text p {
+                  font-size: 18px;
+                  color: #6b7280;
+                  margin: 5px 0 0 0;
+                }
+                
+                .section {
+                  margin-bottom: 30px;
+                }
+                
+                .section-title {
+                  font-size: 20px;
+                  font-weight: 700;
+                  color: #111827;
+                  margin-bottom: 20px;
+                  padding-bottom: 8px;
+                  border-bottom: 2px solid #e5e7eb;
+                }
+                
+                .info-grid {
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 20px;
+                  margin-bottom: 20px;
+                }
+                
+                .info-item {
+                  margin-bottom: 15px;
+                }
+                
+                .info-label {
+                  font-size: 12px;
+                  color: #6b7280;
+                  margin-bottom: 4px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                }
+                
+                .info-value {
+                  font-size: 16px;
+                  font-weight: 600;
+                  color: #111827;
+                }
+                
+                .info-value-large {
+                  font-size: 24px;
+                  font-weight: 700;
+                  color: #111827;
+                }
+                
+                .sinav-secimi-box {
+                  background: #eef2ff;
+                  border: 2px solid #6366f1;
+                  border-radius: 8px;
+                  padding: 16px;
+                  margin-bottom: 20px;
+                }
+                
+                .sinav-secimi-label {
+                  font-size: 12px;
+                  color: #4b5563;
+                  margin-bottom: 6px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                }
+                
+                .sinav-secimi-value {
+                  font-size: 15px;
+                  font-weight: 600;
+                  color: #1e40af;
+                }
+                
+                .warning-box {
+                  background: #fef3c7;
+                  border: 2px solid #fbbf24;
+                  border-radius: 8px;
+                  padding: 16px;
+                  margin-top: 30px;
+                }
+                
+                .warning-text {
+                  font-size: 13px;
+                  color: #92400e;
+                  line-height: 1.6;
+                }
+                
+                .warning-text strong {
+                  font-weight: 700;
+                }
+                
+                .full-width {
+                  grid-column: 1 / -1;
+                }
+                
                 @media print {
-                  body { margin: 0; padding: 20px; }
-                  .no-print { display: none; }
+                  body {
+                    padding: 20px;
+                  }
+                  
+                  .belge-container {
+                    max-width: 100%;
+                  }
+                  
+                  @page {
+                    margin: 1cm;
+                    size: A4;
+                  }
                 }
               </style>
             </head>
             <body>
-              ${belgeRef.current.innerHTML}
+              <div class="belge-container">
+                <!-- Header -->
+                <div class="header">
+                  <div class="header-content">
+                    <div class="logo-container">
+                      <img src="${logoUrl}" alt="Karbon Kurs Plus Logo" onerror="this.style.display='none'">
+                    </div>
+                    <div class="header-text">
+                      <h1>Karbon Kurs Plus</h1>
+                      <p>Sınav Giriş Belgesi</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Öğrenci Bilgileri -->
+                <div class="section">
+                  <h2 class="section-title">Öğrenci Bilgileri</h2>
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <div class="info-label">Ad Soyad</div>
+                      <div class="info-value">${belge.ogrenciAdSoyad}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">TC Kimlik No</div>
+                      <div class="info-value">${belge.ogrenciTc}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Okul</div>
+                      <div class="info-value">${belge.okul}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Sınıf</div>
+                      <div class="info-value">${belge.ogrenciSinifi}</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Sınav Bilgileri -->
+                <div class="section">
+                  <h2 class="section-title">Sınav Bilgileri</h2>
+                  <div class="sinav-secimi-box">
+                    <div class="sinav-secimi-label">Seçilen Sınav</div>
+                    <div class="sinav-secimi-value">${belge.sinavSecimi}</div>
+                  </div>
+                  <div class="info-grid">
+                    ${belge.sinavTarihi ? `
+                    <div class="info-item">
+                      <div class="info-label">Sınav Tarihi</div>
+                      <div class="info-value">${belge.sinavTarihi}</div>
+                    </div>
+                    ` : ''}
+                    <div class="info-item">
+                      <div class="info-label">Sınav Saati</div>
+                      <div class="info-value">${belge.sinavSaati}</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">Sıra Numarası</div>
+                      <div class="info-value-large">${belge.siraNumarasi}</div>
+                    </div>
+                    ${belge.oturum ? `
+                    <div class="info-item">
+                      <div class="info-label">Oturum</div>
+                      <div class="info-value">${belge.oturum}</div>
+                    </div>
+                    ` : ''}
+                    ${belge.sinavSalonu ? `
+                    <div class="info-item">
+                      <div class="info-label">Sınav Salonu</div>
+                      <div class="info-value">${belge.sinavSalonu}</div>
+                    </div>
+                    ` : ''}
+                    ${belge.sinavAdresi ? `
+                    <div class="info-item full-width">
+                      <div class="info-label">Sınav Adresi</div>
+                      <div class="info-value">${belge.sinavAdresi}</div>
+                    </div>
+                    ` : ''}
+                    ${belge.digerNotlar ? `
+                    <div class="info-item full-width">
+                      <div class="info-label">Diğer Notlar</div>
+                      <div class="info-value">${belge.digerNotlar}</div>
+                    </div>
+                    ` : ''}
+                  </div>
+                </div>
+                
+                <!-- Uyarı -->
+                <div class="warning-box">
+                  <p class="warning-text">
+                    <strong>Önemli:</strong> Sınav günü bu belgeyi yanınızda bulundurunuz. Sınav salonuna girişte görevliye teslim ediniz.
+                  </p>
+                </div>
+              </div>
             </body>
           </html>
         `)
         printWindow.document.close()
-        printWindow.focus()
-        setTimeout(() => {
-          printWindow.print()
-          printWindow.close()
-        }, 250)
+        
+        // Logo yüklendikten sonra yazdır
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print()
+          }, 500)
+        }
       }
     }
   }
