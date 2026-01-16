@@ -50,36 +50,36 @@ export default function SinavGirisBelgesiPage() {
                 
                 body {
                   font-family: 'Montserrat', Arial, sans-serif;
-                  padding: 40px;
+                  padding: 15px;
                   background: white;
                   color: #111827;
-                  line-height: 1.6;
+                  line-height: 1.4;
                 }
                 
                 .belge-container {
-                  max-width: 800px;
+                  max-width: 100%;
                   margin: 0 auto;
                   background: white;
                 }
                 
                 .header {
                   text-align: center;
-                  margin-bottom: 40px;
-                  padding-bottom: 20px;
-                  border-bottom: 3px solid #6366f1;
+                  margin-bottom: 20px;
+                  padding-bottom: 12px;
+                  border-bottom: 2px solid #6366f1;
                 }
                 
                 .header-content {
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  gap: 20px;
-                  margin-bottom: 10px;
+                  gap: 15px;
+                  margin-bottom: 5px;
                 }
                 
                 .logo-container {
-                  width: 80px;
-                  height: 80px;
+                  width: 60px;
+                  height: 60px;
                   flex-shrink: 0;
                 }
                 
@@ -90,96 +90,97 @@ export default function SinavGirisBelgesiPage() {
                 }
                 
                 .header-text h1 {
-                  font-size: 32px;
+                  font-size: 24px;
                   font-weight: 800;
                   color: #6366f1;
                   margin: 0;
                 }
                 
                 .header-text p {
-                  font-size: 18px;
+                  font-size: 14px;
                   color: #6b7280;
-                  margin: 5px 0 0 0;
+                  margin: 3px 0 0 0;
                 }
                 
                 .section {
-                  margin-bottom: 30px;
+                  margin-bottom: 18px;
                 }
                 
                 .section-title {
-                  font-size: 20px;
+                  font-size: 16px;
                   font-weight: 700;
                   color: #111827;
-                  margin-bottom: 20px;
-                  padding-bottom: 8px;
-                  border-bottom: 2px solid #e5e7eb;
+                  margin-bottom: 12px;
+                  padding-bottom: 6px;
+                  border-bottom: 1px solid #e5e7eb;
                 }
                 
                 .info-grid {
                   display: grid;
                   grid-template-columns: 1fr 1fr;
-                  gap: 20px;
-                  margin-bottom: 20px;
+                  gap: 12px;
+                  margin-bottom: 12px;
                 }
                 
                 .info-item {
-                  margin-bottom: 15px;
+                  margin-bottom: 10px;
                 }
                 
                 .info-label {
-                  font-size: 12px;
+                  font-size: 10px;
                   color: #6b7280;
-                  margin-bottom: 4px;
+                  margin-bottom: 3px;
                   text-transform: uppercase;
-                  letter-spacing: 0.5px;
+                  letter-spacing: 0.3px;
                 }
                 
                 .info-value {
-                  font-size: 16px;
+                  font-size: 13px;
                   font-weight: 600;
                   color: #111827;
                 }
                 
                 .info-value-large {
-                  font-size: 24px;
+                  font-size: 20px;
                   font-weight: 700;
                   color: #111827;
                 }
                 
                 .sinav-secimi-box {
                   background: #eef2ff;
-                  border: 2px solid #6366f1;
-                  border-radius: 8px;
-                  padding: 16px;
-                  margin-bottom: 20px;
+                  border: 1.5px solid #6366f1;
+                  border-radius: 6px;
+                  padding: 10px;
+                  margin-bottom: 12px;
                 }
                 
                 .sinav-secimi-label {
-                  font-size: 12px;
+                  font-size: 10px;
                   color: #4b5563;
-                  margin-bottom: 6px;
+                  margin-bottom: 4px;
                   text-transform: uppercase;
-                  letter-spacing: 0.5px;
+                  letter-spacing: 0.3px;
                 }
                 
                 .sinav-secimi-value {
-                  font-size: 15px;
+                  font-size: 12px;
                   font-weight: 600;
                   color: #1e40af;
+                  line-height: 1.4;
                 }
                 
                 .warning-box {
                   background: #fef3c7;
-                  border: 2px solid #fbbf24;
-                  border-radius: 8px;
-                  padding: 16px;
-                  margin-top: 30px;
+                  border: 1.5px solid #fbbf24;
+                  border-radius: 6px;
+                  padding: 10px;
+                  margin-top: 15px;
                 }
                 
                 .warning-text {
-                  font-size: 13px;
+                  font-size: 11px;
                   color: #92400e;
-                  line-height: 1.6;
+                  line-height: 1.5;
                 }
                 
                 .warning-text strong {
@@ -192,16 +193,38 @@ export default function SinavGirisBelgesiPage() {
                 
                 @media print {
                   body {
-                    padding: 20px;
+                    padding: 10px;
+                    margin: 0;
                   }
                   
                   .belge-container {
                     max-width: 100%;
+                    margin: 0;
+                  }
+                  
+                  .header {
+                    margin-bottom: 15px;
+                    padding-bottom: 10px;
+                  }
+                  
+                  .section {
+                    margin-bottom: 15px;
+                    page-break-inside: avoid;
+                  }
+                  
+                  .warning-box {
+                    margin-top: 12px;
+                    page-break-inside: avoid;
                   }
                   
                   @page {
-                    margin: 1cm;
+                    margin: 0.8cm;
                     size: A4;
+                  }
+                  
+                  * {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
                   }
                 }
               </style>
