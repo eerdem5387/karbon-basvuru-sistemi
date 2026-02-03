@@ -482,6 +482,7 @@ const trabzonOkullari = [
   'TRABZON - ORTAHİSAR - Zehra Kitapçıoğlu Anaokulu',
   'TRABZON - ORTAHİSAR - Zehra Kitapçıoğlu İlkokulu',
   'TRABZON - ORTAHİSAR - Zübeyde Hanım Kız Anadolu Lisesi',
+  'TRABZON - ORTAHİSAR - Özel Candan Koleji',
   'TRABZON - SÜRMENE - Aşağı Aksu İlkokulu',
   'TRABZON - SÜRMENE - Aşağı Aksu Ortaokulu',
   'TRABZON - SÜRMENE - Ayşe Kırali Ortaokulu',
