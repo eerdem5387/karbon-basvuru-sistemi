@@ -1031,31 +1031,9 @@ export default function HomePage() {
   const [okulSearch, setOkulSearch] = useState('')
   const [selectedSinav, setSelectedSinav] = useState<string>('')
 
-  // Seçilen şubeye göre okul listesi
-  const okullar = selectedSube === 'Trabzon' ? trabzonOkullari : rizeOkullari
-  
-  // Seçilen şubeye göre sınıf listesi (dinamik - Rize için sınav seçimine göre)
-  const siniflar = useMemo(() => {
-    if (selectedSube === 'Trabzon') {
-      return trabzonSiniflar
-    }
-    
-    // Rize için sınav seçimine göre sınıf listesi
-    if (selectedSube === 'Rize' && selectedSinav) {
-      const burslulukSinavi = "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)"
-      
-      if (selectedSinav === burslulukSinavi) {
-        // Bursluluk sınavı için 4-11. sınıflar (12. sınıf hariç)
-        return rizeSiniflar.filter(sinif => sinif !== '12. Sınıf')
-      } else {
-        // Diğer sınavlar için sadece 12. sınıf ve mezun
-        return ['12. Sınıf', 'Mezun']
-      }
-    }
-    
-    // Varsayılan olarak tüm Rize sınıfları
-    return rizeSiniflar
-  }, [selectedSube, selectedSinav])
+  // Trabzon için okul ve sınıf listeleri (Rize başvuruları bitti)
+  const okullar = trabzonOkullari
+  const siniflar = trabzonSiniflar
   
   // Filtrelenmiş okul listesi (arama ile)
   const filteredOkullar = useMemo(() => {
@@ -1336,7 +1314,101 @@ export default function HomePage() {
     )
   }
 
-  // Başvuru Formu (Şube seçildikten sonra)
+  // Rize başvuruları bitti - Teşekkür mesajı
+  if (selectedSube === 'Rize') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        {/* Header */}
+        <header className="bg-white shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {/* Geri Butonu */}
+                <button
+                  onClick={() => setSelectedSube(null)}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span className="font-medium">Şube Seçimi</span>
+                </button>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+                {/* Logo */}
+                <div className="flex items-center gap-3">
+                  <div className="relative h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0">
+                    <Image 
+                      src="/logo.png" 
+                      alt="Karbon Kurs Plus Logo" 
+                      width={80}
+                      height={80}
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                  <div className="text-center sm:text-left">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700">
+                      Karbon Kurs Plus
+                    </h2>
+                    <p className="text-sm text-gray-600">Rize Şubesi</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Teşekkür Mesajı */}
+        <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-xl shadow-xl p-8 sm:p-12 text-center"
+          >
+            <div className="mb-6">
+              <div className="mx-auto w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
+                <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                Teşekkür Ederiz!
+              </h1>
+              <p className="text-lg sm:text-xl text-gray-600 mb-6">
+                Rize şubemize yapılan başvurular tamamlanmıştır.
+              </p>
+              <p className="text-base sm:text-lg text-gray-700 mb-8">
+                Gösterdiğiniz ilgi ve güven için teşekkür ederiz. Başvurularınız değerlendirilecek ve sizlerle iletişime geçilecektir.
+              </p>
+              <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 text-left rounded-lg mb-8">
+                <p className="text-sm sm:text-base text-gray-700">
+                  <strong className="text-indigo-700">Not:</strong> Başvuru sonuçları ve sınav bilgileri için lütfen bizimle iletişime geçiniz.
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedSube(null)}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Şube Seçimine Dön
+              </button>
+            </div>
+          </motion.div>
+        </main>
+
+        {/* Footer */}
+        <div className="text-center text-gray-600 text-sm py-8">
+          <p>© 2025 Karbon Kurs Plus Başvuru Sistemi. Tüm hakları saklıdır.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Başvuru Formu (Trabzon için)
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
@@ -1372,7 +1444,7 @@ export default function HomePage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700">
                     Karbon Kurs Plus
                 </h2>
-                  <p className={`text-lg font-semibold ${selectedSube === 'Rize' ? 'text-green-600' : 'text-blue-600'}`}>
+                  <p className="text-lg font-semibold text-blue-600">
                     {selectedSube} Şubesi
                   </p>
               </div>
@@ -1556,61 +1628,15 @@ export default function HomePage() {
                   )}
                 </div>
 
-                {/* Rize için Sınav Seçimi */}
-                {selectedSube === 'Rize' && (
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Katılmak İstediğiniz Sınav <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      {...register('sinavSecimi')}
-                      onChange={(e) => {
-                        setValue('sinavSecimi', e.target.value)
-                        setSelectedSinav(e.target.value)
-                        // Sınav değiştiğinde sınıf seçimini sıfırla
-                        setValue('ogrenciSinifi', '')
-                      }}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
-                    >
-                      <option value="">Önce sınav seçiniz</option>
-                      {rizeSinavSecenekleri.map((sinav) => (
-                        <option key={sinav} value={sinav}>
-                          {sinav}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.sinavSecimi && (
-                      <p className="mt-1 text-sm text-red-600">{errors.sinavSecimi.message}</p>
-                    )}
-                    {selectedSinav && (
-                      <p className="mt-2 text-sm text-gray-600">
-                        {selectedSinav === "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)" 
-                          ? "✓ Bu sınav için 4-11. sınıflar arasından seçim yapabilirsiniz."
-                          : "✓ Bu sınav için sadece 12. sınıf veya mezun seçebilirsiniz."}
-                      </p>
-                    )}
-                  </div>
-                )}
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Sınıf <span className="text-red-500">*</span>
-                    {selectedSube === 'Rize' && !selectedSinav && (
-                      <span className="ml-2 text-xs text-orange-600">(Önce sınav seçiniz)</span>
-                    )}
                   </label>
                   <select
                     {...register('ogrenciSinifi')}
-                    disabled={selectedSube === 'Rize' && !selectedSinav}
-                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 ${
-                      selectedSube === 'Rize' && !selectedSinav ? 'bg-gray-100 cursor-not-allowed' : ''
-                    }`}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
                   >
-                    <option value="">
-                      {selectedSube === 'Rize' && !selectedSinav 
-                        ? 'Önce sınav seçiniz' 
-                        : 'Seçiniz'}
-                    </option>
+                    <option value="">Seçiniz</option>
                     {siniflar.map((sinif) => (
                       <option key={sinif} value={sinif}>
                         {sinif}
