@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { motion } from 'framer-motion'
+import { rizeSinavSecenekleri } from '@/lib/validations'
 
 interface Basvuru {
   id: string
@@ -238,7 +239,28 @@ export default function AdminDashboard() {
   const [filterTarihBitis, setFilterTarihBitis] = useState('')
   const [filterSinif, setFilterSinif] = useState('')
   const [filterOkul, setFilterOkul] = useState('')
+  const [filterSinav, setFilterSinav] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+
+  const isRize = session?.user?.kurumSube === 'Rize'
+
+  // Rize: sınava göre başvuru sayıları
+  const sinavBasvuruSayilari = useMemo(() => {
+    if (!isRize) return []
+    const counts: { sinav: string; count: number }[] = []
+    const map = new Map<string, number>()
+    for (const b of basvurular) {
+      const key = b.sinavSecimi?.trim() || 'Belirtilmedi'
+      map.set(key, (map.get(key) ?? 0) + 1)
+    }
+    rizeSinavSecenekleri.forEach((s) => {
+      const count = map.get(s) ?? 0
+      if (count > 0) counts.push({ sinav: s, count })
+    })
+    const belirtilmedi = map.get('Belirtilmedi') ?? 0
+    if (belirtilmedi > 0) counts.push({ sinav: 'Belirtilmedi', count: belirtilmedi })
+    return counts
+  }, [basvurular, isRize])
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -316,6 +338,7 @@ export default function AdminDashboard() {
     setFilterTarihBitis('')
     setFilterSinif('')
     setFilterOkul('')
+    setFilterSinav('')
     setSearchTerm('')
   }
 
@@ -348,7 +371,14 @@ export default function AdminDashboard() {
     // Okul filtresi
     const matchesOkul = !filterOkul || b.okul === filterOkul
 
-    return matchesSearch && matchesTarihBaslangic && matchesTarihBitis && matchesSinif && matchesOkul
+    // Sınav filtresi (sadece Rize)
+    const matchesSinav = !filterSinav || (
+      filterSinav === 'Belirtilmedi'
+        ? !b.sinavSecimi?.trim()
+        : b.sinavSecimi === filterSinav
+    )
+
+    return matchesSearch && matchesTarihBaslangic && matchesTarihBitis && matchesSinif && matchesOkul && matchesSinav
   })
 
   if (status === 'loading' || isLoading) {
@@ -467,6 +497,30 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
 
+        {/* Rize: Sınava göre başvuru sayıları */}
+        {isRize && sinavBasvuruSayilari.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-gray-900 mb-3">Sınava Göre Başvuru Sayıları</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {sinavBasvuruSayilari.map(({ sinav, count }, idx) => (
+                <motion.div
+                  key={sinav}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * idx }}
+                  className="bg-white rounded-lg shadow p-4 border-l-4 border-indigo-500"
+                >
+                  <p className="text-xs font-medium text-gray-500 line-clamp-2 mb-1" title={sinav}>
+                    {sinav}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">{count}</p>
+                  <p className="text-xs text-gray-400">başvuru</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Search */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="flex items-center space-x-4 mb-4">
@@ -496,7 +550,7 @@ export default function AdminDashboard() {
               </svg>
               <span>Filtrele</span>
             </button>
-            {(filterTarihBaslangic || filterTarihBitis || filterSinif || filterOkul) && (
+            {(filterTarihBaslangic || filterTarihBitis || filterSinif || filterOkul || filterSinav) && (
               <button
                 onClick={clearFilters}
                 className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200 flex items-center space-x-2"
@@ -581,6 +635,28 @@ export default function AdminDashboard() {
                     ))}
                   </select>
                 </div>
+
+                {/* Sınav Filtresi (sadece Rize) */}
+                {isRize && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sınav
+                    </label>
+                    <select
+                      value={filterSinav}
+                      onChange={(e) => setFilterSinav(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="">Tüm Sınavlar</option>
+                      {rizeSinavSecenekleri.map((sinav) => (
+                        <option key={sinav} value={sinav}>
+                          {sinav}
+                        </option>
+                      ))}
+                      <option value="Belirtilmedi">Belirtilmedi</option>
+                    </select>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -598,6 +674,11 @@ export default function AdminDashboard() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Okul/Sınıf
                   </th>
+                  {isRize && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Sınav
+                    </th>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     İletişim
                   </th>
@@ -612,7 +693,7 @@ export default function AdminDashboard() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredBasvurular.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                    <td colSpan={isRize ? 6 : 5} className="px-6 py-12 text-center text-gray-500">
                       {basvurular.length === 0 ? 'Henüz başvuru bulunmamaktadır.' : 'Arama sonucu bulunamadı.'}
                     </td>
                   </tr>
@@ -637,6 +718,13 @@ export default function AdminDashboard() {
                           {basvuru.ogrenciSinifi}
                         </div>
                       </td>
+                      {isRize && (
+                        <td className="px-6 py-4 max-w-xs">
+                          <div className="text-sm text-gray-900 truncate" title={basvuru.sinavSecimi || 'Belirtilmedi'}>
+                            {basvuru.sinavSecimi || 'Belirtilmedi'}
+                          </div>
+                        </td>
+                      )}
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{basvuru.email}</div>
                         <div className="text-sm text-gray-500">{basvuru.babaCepTel}</div>
