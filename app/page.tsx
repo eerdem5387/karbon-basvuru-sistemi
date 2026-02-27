@@ -1253,7 +1253,7 @@ export default function HomePage() {
               </div>
             </motion.div>
 
-            {/* Trabzon Şubesi */}
+            {/* Trabzon Şubesi (geçici olarak gizlendi)
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -1290,6 +1290,7 @@ export default function HomePage() {
                 </div>
               </div>
             </motion.div>
+            */}
           </div>
 
           {/* Bilgilendirme */}
