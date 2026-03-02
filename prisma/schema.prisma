@@ -10,7 +10,7 @@ datasource db {
 model Basvuru {
   id               String   @id @default(cuid())
   ogrenciAdSoyad   String
-  ogrenciTc        String   @unique
+  ogrenciTc        String
   okul             String
   ogrenciSinifi    String
   ogrenciSube      String   @default("Belirtilmedi")

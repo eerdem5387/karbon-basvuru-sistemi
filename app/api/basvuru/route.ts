@@ -49,14 +49,34 @@ export async function POST(request: Request) {
     const babaCepTel = validatedData.babaCepTel
     const anneCepTel = validatedData.anneCepTel
     
-    // TC Kimlik No ile daha önce başvuru yapılmış mı kontrol et
-    const existingBasvuru = await prisma.basvuru.findUnique({
-      where: { ogrenciTc: validatedData.ogrenciTc }
-    })
-    
+    // TC Kimlik No ile aynı sınava daha önce başvuru yapılmış mı kontrol et
+    let existingBasvuru = null
+
+    if (validatedData.kurumSube === 'Rize' && validatedData.sinavSecimi) {
+      // Rize için: aynı TC + aynı sınav kombinasyonunu engelle,
+      // farklı sınavlara tekrar başvuruya izin ver
+      existingBasvuru = await prisma.basvuru.findFirst({
+        where: {
+          ogrenciTc: validatedData.ogrenciTc,
+          kurumSube: 'Rize',
+          sinavSecimi: validatedData.sinavSecimi,
+        },
+      })
+    } else {
+      // Diğer şubeler için: aynı TC + aynı şube kombinasyonunu engelle
+      if (validatedData.kurumSube) {
+        existingBasvuru = await prisma.basvuru.findFirst({
+          where: {
+            ogrenciTc: validatedData.ogrenciTc,
+            kurumSube: validatedData.kurumSube,
+          },
+        })
+      }
+    }
+
     if (existingBasvuru) {
       return NextResponse.json(
-        { error: "Bu TC Kimlik No ile daha önce başvuru yapılmış." },
+        { error: "Bu sınava bu TC Kimlik No ile daha önce başvuru yapılmış." },
         { status: 400 }
       )
     }
@@ -109,12 +129,6 @@ export async function POST(request: Request) {
     
     // Prisma connection errors
     if (error && typeof error === 'object' && 'code' in error) {
-      if (error.code === 'P2002') {
-        return NextResponse.json(
-          { error: "Bu TC Kimlik No ile daha önce başvuru yapılmış." },
-          { status: 400 }
-        )
-      }
       if (error.code === 'P1001' || error.code === 'P1002') {
         return NextResponse.json(
           { error: "Veritabanı bağlantı hatası. Lütfen daha sonra tekrar deneyiniz." },
