@@ -12,9 +12,10 @@ export async function POST(request: Request) {
     // TC validasyonu
     const validatedTc = tcSchema.parse(ogrenciTc)
 
-    // Başvuruyu bul
-    const basvuru = await prisma.basvuru.findUnique({
+    // Başvuruyu bul (aynı TC ile birden fazla başvuru olabileceği için son başvuruyu al)
+    const basvuru = await prisma.basvuru.findFirst({
       where: { ogrenciTc: validatedTc },
+      orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         ogrenciAdSoyad: true,
