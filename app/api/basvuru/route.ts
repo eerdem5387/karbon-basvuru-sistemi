@@ -107,7 +107,10 @@ export async function POST(request: Request) {
     
     console.error("Başvuru hatası:", error)
     return NextResponse.json(
-      { error: "Başvuru kaydedilirken bir hata oluştu. Lütfen tekrar deneyiniz." },
+      { 
+        error: "Başvuru kaydedilirken bir hata oluştu. Lütfen tekrar deneyiniz.",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     )
   }
