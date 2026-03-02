@@ -48,39 +48,7 @@ export async function POST(request: Request) {
     // Telefon numaraları zaten 10 hane olarak geliyor (frontend'de kontrol ediliyor)
     const babaCepTel = validatedData.babaCepTel
     const anneCepTel = validatedData.anneCepTel
-    
-    // TC Kimlik No ile aynı sınava daha önce başvuru yapılmış mı kontrol et
-    let existingBasvuru = null
-
-    if (validatedData.kurumSube === 'Rize' && validatedData.sinavSecimi) {
-      // Rize için: aynı TC + aynı sınav kombinasyonunu engelle,
-      // farklı sınavlara tekrar başvuruya izin ver
-      existingBasvuru = await prisma.basvuru.findFirst({
-        where: {
-          ogrenciTc: validatedData.ogrenciTc,
-          kurumSube: 'Rize',
-          sinavSecimi: validatedData.sinavSecimi,
-        },
-      })
-    } else {
-      // Diğer şubeler için: aynı TC + aynı şube kombinasyonunu engelle
-      if (validatedData.kurumSube) {
-        existingBasvuru = await prisma.basvuru.findFirst({
-          where: {
-            ogrenciTc: validatedData.ogrenciTc,
-            kurumSube: validatedData.kurumSube,
-          },
-        })
-      }
-    }
-
-    if (existingBasvuru) {
-      return NextResponse.json(
-        { error: "Bu sınava bu TC Kimlik No ile daha önce başvuru yapılmış." },
-        { status: 400 }
-      )
-    }
-    
+        
     // Başvuruyu kaydet
     const basvuru = await prisma.basvuru.create({
       data: {
