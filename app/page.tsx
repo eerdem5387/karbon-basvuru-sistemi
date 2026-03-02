@@ -1146,13 +1146,18 @@ export default function HomePage() {
     } catch (error) {
       // Hata objesi veya Error instance'ı kontrolü
       if (error && typeof error === 'object' && 'message' in error) {
+        const anyError = error as { message: string; details?: unknown }
+        const detailsArray = Array.isArray(anyError.details)
+          ? (anyError.details as Array<{ path: string[]; message: string }>)
+          : undefined
+
         setSubmitError({
-          message: error.message as string,
-          details: 'details' in error ? (error.details as Array<{ path: string[]; message: string }>) : undefined
+          message: anyError.message,
+          details: detailsArray,
         })
       } else {
         setSubmitError({
-          message: error instanceof Error ? error.message : 'Bir hata oluştu'
+          message: error instanceof Error ? error.message : 'Bir hata oluştu',
         })
       }
       
