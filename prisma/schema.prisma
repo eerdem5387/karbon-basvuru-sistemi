@@ -28,10 +28,12 @@ model Basvuru {
   digerNotlar      String?
   babaAdSoyad      String
   babaMeslek       String
+  babaDurumu       String   @default("Sağ")
   babaIsAdresi     String   @default("")
   babaCepTel       String
   anneAdSoyad      String
   anneMeslek       String
+  anneDurumu       String   @default("Sağ")
   anneIsAdresi     String   @default("")
   anneCepTel       String
   email            String

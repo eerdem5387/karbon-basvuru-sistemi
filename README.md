@@ -1,4 +1,4 @@
-# 🎓 Bursluluk Sınavı Başvuru Sistemi
+# 🎓 Sınav Başvuru Sistemi
 
 Modern ve güvenli bir başvuru sistemi. Next.js 15, TypeScript, Prisma ve Neon Database ile geliştirilmiştir.
 

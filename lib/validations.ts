@@ -60,6 +60,8 @@ export const basvuruSchema = z.object({
   babaMeslek: z.string()
     .min(1, "Baba meslek seçimi zorunludur"),
   
+  babaDurumu: z.enum(["Sağ", "Vefat"]),
+  
   babaIsAdresi: z.string()
     .min(15, "Baba iş adresi en az 15 karakter olmalıdır")
     .max(500, "Baba iş adresi en fazla 500 karakter olabilir"),
@@ -76,6 +78,8 @@ export const basvuruSchema = z.object({
   
   anneMeslek: z.string()
     .min(1, "Anne meslek seçimi zorunludur"),
+  
+  anneDurumu: z.enum(["Sağ", "Vefat"]),
   
   anneIsAdresi: z.string()
     .min(15, "Anne iş adresi en az 15 karakter olmalıdır")

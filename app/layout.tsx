@@ -11,11 +11,11 @@ const montserrat = Montserrat({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://basvuru.karbonkursplus.com'),
-  title: "Bursluluk Sınavı Başvuru Sistemi - Karbon Kurs Plus",
-  description: "2025 Yılı Bursluluk Sınavı İçin Başvuru Formu - Karbon Kurs Plus (Rize & Trabzon)",
+  title: "Sınav Başvuru Sistemi - Karbon Kurs Plus",
+  description: "Karbon Kurs Plus için online sınav başvuru formu",
   openGraph: {
-    title: "Bursluluk Sınavı Başvuru Sistemi - Karbon Kurs Plus",
-    description: "2025 Yılı Bursluluk Sınavı İçin Başvuru Formu - Karbon Kurs Plus",
+    title: "Sınav Başvuru Sistemi - Karbon Kurs Plus",
+    description: "Karbon Kurs Plus için online sınav başvuru formu",
     url: 'https://basvuru.karbonkursplus.com',
     siteName: 'Karbon Kurs Plus Başvuru Sistemi',
     images: [
@@ -31,8 +31,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: "Bursluluk Sınavı Başvuru Sistemi - Karbon Kurs Plus",
-    description: "2025 Yılı Bursluluk Sınavı İçin Başvuru Formu - Karbon Kurs Plus",
+    title: "Sınav Başvuru Sistemi - Karbon Kurs Plus",
+    description: "Karbon Kurs Plus için online sınav başvuru formu",
     images: ['/logo.png'],
   },
 };

@@ -1199,7 +1199,7 @@ export default function HomePage() {
               {/* Başvuru Başlığı */}
               <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                  Bursluluk Sınavı Başvuru Sistemi
+                  Sınav Başvuru Sistemi
                 </h1>
               </div>
             </div>
@@ -1390,10 +1390,10 @@ export default function HomePage() {
             {/* Başvuru Başlığı */}
             <div className="text-center sm:text-left">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                  Bursluluk Sınavı Başvuru Formu
+                  Sınav Başvuru Formu
               </h1>
               <p className="text-gray-600 text-sm sm:text-base">
-                  2026 - 2027 Yılı Bursluluk Sınavı
+                  2026 - 2027 Yılı Sınav Başvurusu
               </p>
             </div>
             </div>
@@ -1669,16 +1669,17 @@ export default function HomePage() {
                       {...register('okul')}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
                     >
-                        <option value="">
-                          {filteredOkullar.length === 0 && okulSearch 
-                            ? 'Arama sonucu bulunamadı...' 
-                            : 'Seçiniz'}
-                        </option>
-                        {filteredOkullar.map((okul) => (
+                      <option value="">
+                        {filteredOkullar.length === 0 && okulSearch 
+                          ? 'Arama sonucu bulunamadı...' 
+                          : 'Seçiniz'}
+                      </option>
+                      {filteredOkullar.map((okul) => (
                         <option key={okul} value={okul}>
                           {okul}
                         </option>
                       ))}
+                      <option value="Diğer">Diğer (listede yok)</option>
                     </select>
                       {okulSearch && filteredOkullar.length > 0 && (
                         <p className="mt-1 text-sm text-green-600">
@@ -1757,6 +1758,20 @@ export default function HomePage() {
                   {errors.babaMeslek && (
                     <p className="mt-1 text-sm text-red-600">{errors.babaMeslek.message}</p>
                   )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Baba Durumu <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    defaultValue="Sağ"
+                    {...register('babaDurumu')}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                  >
+                    <option value="Sağ">Sağ</option>
+                    <option value="Vefat">Vefat</option>
+                  </select>
                 </div>
 
                 <div>
@@ -1861,6 +1876,20 @@ export default function HomePage() {
                   {errors.anneMeslek && (
                     <p className="mt-1 text-sm text-red-600">{errors.anneMeslek.message}</p>
                   )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Anne Durumu <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    defaultValue="Sağ"
+                    {...register('anneDurumu')}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                  >
+                    <option value="Sağ">Sağ</option>
+                    <option value="Vefat">Vefat</option>
+                  </select>
                 </div>
 
                 <div>

@@ -26,10 +26,12 @@ interface Basvuru {
   digerNotlar: string | null
   babaAdSoyad: string
   babaMeslek: string
+  babaDurumu: string
   babaIsAdresi: string
   babaCepTel: string
   anneAdSoyad: string
   anneMeslek: string
+  anneDurumu: string
   anneIsAdresi: string
   anneCepTel: string
   email: string
@@ -827,6 +829,10 @@ export default function AdminDashboard() {
                     <p className="text-sm text-gray-600">Meslek</p>
                     <p className="font-medium text-gray-900">{selectedBasvuru.babaMeslek}</p>
                   </div>
+              <div>
+                <p className="text-sm text-gray-600">Durumu</p>
+                <p className="font-medium text-gray-900">{selectedBasvuru.babaDurumu || '-'}</p>
+              </div>
                   <div>
                     <p className="text-sm text-gray-600">Cep Telefonu</p>
                     <p className="font-medium text-gray-900">{selectedBasvuru.babaCepTel}</p>
@@ -850,6 +856,10 @@ export default function AdminDashboard() {
                     <p className="text-sm text-gray-600">Meslek</p>
                     <p className="font-medium text-gray-900">{selectedBasvuru.anneMeslek}</p>
                   </div>
+              <div>
+                <p className="text-sm text-gray-600">Durumu</p>
+                <p className="font-medium text-gray-900">{selectedBasvuru.anneDurumu || '-'}</p>
+              </div>
                   <div>
                     <p className="text-sm text-gray-600">Cep Telefonu</p>
                     <p className="font-medium text-gray-900">{selectedBasvuru.anneCepTel}</p>
