@@ -1518,6 +1518,31 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* Çoklu sınav başvurusu uyarısı */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-start gap-3 sm:gap-4 rounded-2xl border-2 border-yellow-400 bg-yellow-50 px-4 py-3 sm:px-6 sm:py-4 shadow-md">
+            <div className="mt-0.5">
+              <svg
+                className="h-6 w-6 sm:h-7 sm:w-7 text-yellow-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0z"
+                />
+              </svg>
+            </div>
+            <p className="text-sm sm:text-base text-yellow-900 font-semibold leading-relaxed">
+              Birden fazla sınava başvurmak isteyen öğrencilerimiz. Lütfen bir sonraki başvuruyu yapmadan önce 10 dakika
+              beklemenizi rica ederiz.
+            </p>
+          </div>
+        </div>
+
         {/* Form */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <form onSubmit={handleSubmit(onSubmit)} className="p-6 sm:p-8 space-y-8">

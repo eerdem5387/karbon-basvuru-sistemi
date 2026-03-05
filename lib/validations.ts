@@ -25,7 +25,7 @@ export const tcKimlikValidator = (tc: string): boolean => {
 
 // Sınav seçenekleri
 export const rizeSinavSecenekleri = [
-  "14 Mart Karbon Kursa Özel Türkiye Geneli Orijinal Yayınları TYT Deneme Sınavı",
+  "14 Mart Karbon Kursa Özel Türkiye Geneli Bilgi Sarmalı Yayınları TYT Deneme Sınavı",
   "11 Nisan Bilgi Sarmalı Türkiye Geneli TYT (ücretsiz)",
   "2 Mayıs 3,4,5 yayınları Türkiye Geneli TYT Son Prova (ücretsiz)"
 ] as const
