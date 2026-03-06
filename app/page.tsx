@@ -1043,10 +1043,14 @@ export default function HomePage() {
     // Rize için sınav seçimine göre sınıf listesi
     if (selectedSube === 'Rize' && selectedSinav) {
       const burslulukSinavi = "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)"
+      const martTytDeneme = "14 Mart Karbon Kursa Özel Türkiye Geneli Bilgi Sarmalı Yayınları TYT Deneme Sınavı"
       
       if (selectedSinav === burslulukSinavi) {
         // Bursluluk sınavı için 4-11. sınıflar (12. sınıf hariç)
         return rizeSiniflar.filter(sinif => sinif !== '12. Sınıf')
+      } else if (selectedSinav === martTytDeneme) {
+        // 14 Mart TYT denemesi için 11-12. sınıf ve mezun
+        return ['11. Sınıf', '12. Sınıf', 'Mezun']
       } else {
         // Diğer sınavlar için sadece 12. sınıf ve mezun
         return ['12. Sınıf', 'Mezun']
@@ -1615,9 +1619,11 @@ export default function HomePage() {
                     )}
                     {selectedSinav && (
                       <p className="mt-2 text-sm text-gray-600">
-                        {selectedSinav === "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)" 
+                        {selectedSinav === "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)"
                           ? "✓ Bu sınav için 4-11. sınıflar arasından seçim yapabilirsiniz."
-                          : "✓ Bu sınav için sadece 12. sınıf veya mezun seçebilirsiniz."}
+                          : selectedSinav === "14 Mart Karbon Kursa Özel Türkiye Geneli Bilgi Sarmalı Yayınları TYT Deneme Sınavı"
+                            ? "✓ Bu sınav için 11-12. sınıf veya mezun seçebilirsiniz."
+                            : "✓ Bu sınav için sadece 12. sınıf veya mezun seçebilirsiniz."}
                       </p>
                     )}
                   </div>
