@@ -15,21 +15,21 @@ export async function GET(request: Request) {
       )
     }
 
-    // Query parametrelerini al
+    // Query parametrelerini al (paneldeki filtrelerle aynı)
     const { searchParams } = new URL(request.url)
     const tarihBaslangic = searchParams.get('tarihBaslangic')
     const tarihBitis = searchParams.get('tarihBitis')
     const sinif = searchParams.get('sinif')
     const okul = searchParams.get('okul')
+    const sinav = searchParams.get('sinav')
 
     // Admin kullanıcısının şubesine göre filtreleme
     const kurumSube = session.user.kurumSube
 
-    // Filtreleme için where koşulları - eski başvuruları da dahil et
+    // Filtreleme için where koşulları - paneldeki /api/admin/basvurular mantığıyla uyumlu
     const where: Prisma.BasvuruWhereInput = {
       OR: [
         { kurumSube: kurumSube },
-        // Eski başvurular için: okul adına göre otomatik tespit
         {
           okul: {
             contains: kurumSube === 'Rize' ? 'RİZE' : 'TRABZON',
@@ -57,11 +57,27 @@ export async function GET(request: Request) {
       where.okul = okul
     }
 
-    const basvurular = await prisma.basvuru.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc'
+    // Rize: sınava göre filtre (paneldeki sınav filtresiyle birebir aynı)
+    let queryWhere: Prisma.BasvuruWhereInput = where
+    if (kurumSube === 'Rize' && sinav) {
+      const sinavKosulu: Prisma.BasvuruWhereInput =
+        sinav === 'Belirtilmedi'
+          ? { OR: [{ sinavSecimi: null }, { sinavSecimi: '' }] }
+          : { sinavSecimi: sinav }
+      queryWhere = {
+        AND: [
+          { OR: where.OR },
+          sinavKosulu,
+          ...(tarihBaslangic || tarihBitis ? [{ createdAt: where.createdAt }] : []),
+          ...(sinif ? [{ ogrenciSinifi: sinif }] : []),
+          ...(okul ? [{ okul }] : []),
+        ].filter(Boolean) as Prisma.BasvuruWhereInput[]
       }
+    }
+
+    const basvurular = await prisma.basvuru.findMany({
+      where: queryWhere,
+      orderBy: { createdAt: 'desc' }
     })
 
     // Excel için veriyi hazırla
@@ -105,11 +121,13 @@ export async function GET(request: Request) {
     // Buffer'a çevir
     const excelBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
 
-    // Response oluştur
+    // Response oluştur (önbelleğe alınmasın, her indirme güncel veri olsun)
     return new NextResponse(excelBuffer, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="basvurular-${new Date().toISOString().split('T')[0]}.xlsx"`,
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
       },
     })
   } catch (error) {

@@ -276,10 +276,16 @@ export default function AdminDashboard() {
     }
   }, [status])
 
+  // Tüm adminlerde aynı "bugün" için Türkiye (İstanbul) tarihi kullan (farklı cihaz/saat dilimi farkını kaldırır)
+  const bugunTurkey = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Istanbul' })
+
   const fetchBasvurular = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch('/api/admin/basvurular')
+      const response = await fetch(`/api/admin/basvurular?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+      })
       
       if (!response.ok) {
         throw new Error('Başvurular yüklenemedi')
@@ -305,14 +311,18 @@ export default function AdminDashboard() {
   const handleExport = async () => {
     try {
       setIsExporting(true)
-      // Filtre parametrelerini query string olarak gönder
+      // Paneldeki filtrelerle aynı veriyi export et (Excel panelde gördüğünle aynı olsun)
       const params = new URLSearchParams()
       if (filterTarihBaslangic) params.append('tarihBaslangic', filterTarihBaslangic)
       if (filterTarihBitis) params.append('tarihBitis', filterTarihBitis)
       if (filterSinif) params.append('sinif', filterSinif)
       if (filterOkul) params.append('okul', filterOkul)
-      
-      const response = await fetch(`/api/admin/export?${params.toString()}`)
+      if (isRize && filterSinav) params.append('sinav', filterSinav)
+      params.set('_t', String(Date.now()))
+      const response = await fetch(`/api/admin/export?${params.toString()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      })
       
       if (!response.ok) {
         throw new Error('Excel dosyası oluşturulamadı')
@@ -322,7 +332,7 @@ export default function AdminDashboard() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      const filterSuffix = filterTarihBaslangic || filterTarihBitis || filterSinif || filterOkul ? '-filtrelenmis' : ''
+      const filterSuffix = (filterTarihBaslangic || filterTarihBitis || filterSinif || filterOkul || filterSinav) ? '-filtrelenmis' : ''
       a.download = `basvurular${filterSuffix}-${new Date().toISOString().split('T')[0]}.xlsx`
       document.body.appendChild(a)
       a.click()
@@ -473,7 +483,9 @@ export default function AdminDashboard() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Bugünkü Başvurular</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {basvurular.filter(b => new Date(b.createdAt).toDateString() === new Date().toDateString()).length}
+                  {basvurular.filter(b =>
+                    new Date(b.createdAt).toLocaleDateString('en-CA', { timeZone: 'Europe/Istanbul' }) === bugunTurkey
+                  ).length}
                 </p>
               </div>
             </div>

@@ -124,7 +124,13 @@ export async function GET() {
       })
     }
     
-    return NextResponse.json(basvurular)
+    return NextResponse.json(basvurular, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
   } catch (error) {
     console.error("Başvurular getirme hatası:", error)
     console.error("Error details:", {
