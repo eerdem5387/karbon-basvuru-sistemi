@@ -255,12 +255,27 @@ export default function AdminDashboard() {
       const key = b.sinavSecimi?.trim() || 'Belirtilmedi'
       map.set(key, (map.get(key) ?? 0) + 1)
     }
+    // Tanımlı sınavlar (şu an aktif olan seçenekler)
     rizeSinavSecenekleri.forEach((s) => {
       const count = map.get(s) ?? 0
       if (count > 0) counts.push({ sinav: s, count })
     })
+
+    // Belirtilmemiş sınavlar
     const belirtilmedi = map.get('Belirtilmedi') ?? 0
     if (belirtilmedi > 0) counts.push({ sinav: 'Belirtilmedi', count: belirtilmedi })
+
+    // Eski / tanımsız sınav adları (ör. artık listede olmayan 7 Şubat sınavları)
+    const knownSinavlar = new Set<string>([
+      ...rizeSinavSecenekleri,
+      'Belirtilmedi',
+    ])
+    for (const [key, value] of map.entries()) {
+      if (!knownSinavlar.has(key) && value > 0) {
+        counts.push({ sinav: key, count: value })
+      }
+    }
+
     return counts
   }, [basvurular, isRize])
 
