@@ -106,6 +106,7 @@ export const basvuruSchema = z.object({
   // Sınav seçimine göre sınıf kontrolü
   if (data.kurumSube === "Rize" && data.sinavSecimi) {
     const burslulukSinavi = "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)"
+    const martTytDeneme = "14 Mart Karbon Kursa Özel Türkiye Geneli Bilgi Sarmalı Yayınları TYT Deneme Sınavı"
     
     if (data.sinavSecimi === burslulukSinavi) {
       // Bursluluk sınavı seçildiyse 12. sınıf seçilemez
@@ -113,6 +114,15 @@ export const basvuruSchema = z.object({
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Bu sınav için 12. sınıf seçilemez. Lütfen 4-11. sınıflar arasından seçim yapın.",
+          path: ["ogrenciSinifi"],
+        })
+      }
+    } else if (data.sinavSecimi === martTytDeneme) {
+      // 14 Mart TYT denemesi için 11-12. sınıf veya mezun seçilebilir
+      if (data.ogrenciSinifi !== "11. Sınıf" && data.ogrenciSinifi !== "12. Sınıf" && data.ogrenciSinifi !== "Mezun") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Bu sınav için sadece 11-12. sınıf veya mezun seçilebilir.",
           path: ["ogrenciSinifi"],
         })
       }
