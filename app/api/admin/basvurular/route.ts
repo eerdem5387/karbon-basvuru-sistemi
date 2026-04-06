@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth()
     
@@ -26,7 +26,9 @@ export async function GET() {
     }
     
     console.log('[Admin API] Kurum Şube:', kurumSube)
-    
+
+    const arsivOnly = new URL(request.url).searchParams.get('arsiv') === 'true'
+
     // Önce tüm başvuruları say
     const toplamBasvuru = await prisma.basvuru.count()
     console.log('[Admin API] Toplam başvuru:', toplamBasvuru)
@@ -63,6 +65,7 @@ export async function GET() {
         sinavAdresi: true,
         sinavTarihi: true,
         digerNotlar: true,
+        arsivlendi: true,
       },
       orderBy: {
         createdAt: 'desc'
@@ -96,12 +99,15 @@ export async function GET() {
       return false
     })
     
-    console.log('[Admin API] Filtrelenmiş başvuru sayısı:', basvurular.length)
-    
-    console.log('[Admin API] Filtrelenmiş başvuru sayısı:', basvurular.length)
+    const basvurularArsivAyrimli = basvurular.filter((b) => {
+      const arsiv = Boolean((b as { arsivlendi?: boolean }).arsivlendi)
+      return arsivOnly ? arsiv : !arsiv
+    })
+
+    console.log('[Admin API] Filtrelenmiş başvuru sayısı:', basvurularArsivAyrimli.length)
     
     // Eski başvuruların kurumSube değerini güncelle (asenkron, kullanıcıyı bekletme)
-    const guncellenecekBasvurular = basvurular.filter(b => 
+    const guncellenecekBasvurular = basvurularArsivAyrimli.filter(b => 
       !b.kurumSube || b.kurumSube === '' || b.kurumSube === 'Belirtilmedi'
     )
     
@@ -124,7 +130,7 @@ export async function GET() {
       })
     }
     
-    return NextResponse.json(basvurular, {
+    return NextResponse.json(basvurularArsivAyrimli, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',

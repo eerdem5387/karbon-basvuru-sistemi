@@ -37,12 +37,14 @@ model Basvuru {
   anneIsAdresi     String   @default("")
   anneCepTel       String
   email            String
+  arsivlendi       Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   @@index([ogrenciTc])
   @@index([email])
   @@index([kurumSube])
+  @@index([arsivlendi])
 }
 
 model Admin {

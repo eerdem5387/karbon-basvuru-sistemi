@@ -22,57 +22,55 @@ export async function GET(request: Request) {
     const sinif = searchParams.get('sinif')
     const okul = searchParams.get('okul')
     const sinav = searchParams.get('sinav')
+    const arsivParam = searchParams.get('arsiv')
 
     // Admin kullanıcısının şubesine göre filtreleme
     const kurumSube = session.user.kurumSube
 
-    // Filtreleme için where koşulları - paneldeki /api/admin/basvurular mantığıyla uyumlu
-    const where: Prisma.BasvuruWhereInput = {
+    const arsivKosulu: Prisma.BasvuruWhereInput =
+      arsivParam === 'true' ? { arsivlendi: true } : { arsivlendi: false }
+
+    const subeOr: Prisma.BasvuruWhereInput = {
       OR: [
         { kurumSube: kurumSube },
         {
           okul: {
             contains: kurumSube === 'Rize' ? 'RİZE' : 'TRABZON',
-            mode: 'insensitive'
-          }
-        }
-      ]
+            mode: 'insensitive',
+          },
+        },
+      ],
     }
 
+    const andParts: Prisma.BasvuruWhereInput[] = [subeOr, arsivKosulu]
+
     if (tarihBaslangic || tarihBitis) {
-      where.createdAt = {}
+      const createdAt: Prisma.DateTimeFilter = {}
       if (tarihBaslangic) {
-        where.createdAt.gte = new Date(tarihBaslangic)
+        createdAt.gte = new Date(tarihBaslangic)
       }
       if (tarihBitis) {
-        where.createdAt.lte = new Date(tarihBitis + 'T23:59:59')
+        createdAt.lte = new Date(tarihBitis + 'T23:59:59')
       }
+      andParts.push({ createdAt })
     }
 
     if (sinif) {
-      where.ogrenciSinifi = sinif
+      andParts.push({ ogrenciSinifi: sinif })
     }
 
     if (okul) {
-      where.okul = okul
+      andParts.push({ okul })
     }
 
-    // Rize: sınava göre filtre (paneldeki sınav filtresiyle birebir aynı)
-    let queryWhere: Prisma.BasvuruWhereInput = where
+    let queryWhere: Prisma.BasvuruWhereInput = { AND: andParts }
+
     if (kurumSube === 'Rize' && sinav) {
       const sinavKosulu: Prisma.BasvuruWhereInput =
         sinav === 'Belirtilmedi'
           ? { OR: [{ sinavSecimi: null }, { sinavSecimi: '' }] }
           : { sinavSecimi: sinav }
-      queryWhere = {
-        AND: [
-          { OR: where.OR },
-          sinavKosulu,
-          ...(tarihBaslangic || tarihBitis ? [{ createdAt: where.createdAt }] : []),
-          ...(sinif ? [{ ogrenciSinifi: sinif }] : []),
-          ...(okul ? [{ okul }] : []),
-        ].filter(Boolean) as Prisma.BasvuruWhereInput[]
-      }
+      queryWhere = { AND: [...andParts, sinavKosulu] }
     }
 
     const basvurular = await prisma.basvuru.findMany({

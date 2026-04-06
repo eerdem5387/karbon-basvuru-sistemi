@@ -3,7 +3,12 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { basvuruSchema, type BasvuruFormData, rizeSinavSecenekleri } from '@/lib/validations'
+import {
+  basvuruSchema,
+  type BasvuruFormData,
+  rizeSinavSecenekleri,
+  rizeMayisTyTSinavMetni,
+} from '@/lib/validations'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -1029,38 +1034,10 @@ export default function HomePage() {
   const [anneMeslekSearch, setAnneMeslekSearch] = useState('')
   const [kvkkOnay, setKvkkOnay] = useState(false)
   const [okulSearch, setOkulSearch] = useState('')
-  const [selectedSinav, setSelectedSinav] = useState<string>('')
 
   // Seçilen şubeye göre okul listesi
   const okullar = selectedSube === 'Trabzon' ? trabzonOkullari : rizeOkullari
-  
-  // Seçilen şubeye göre sınıf listesi (dinamik - Rize için sınav seçimine göre)
-  const siniflar = useMemo(() => {
-    if (selectedSube === 'Trabzon') {
-      return trabzonSiniflar
-    }
-    
-    // Rize için sınav seçimine göre sınıf listesi
-    if (selectedSube === 'Rize' && selectedSinav) {
-      const burslulukSinavi = "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)"
-      const martTytDeneme = "14 Mart Karbon Kursa Özel Türkiye Geneli Bilgi Sarmalı Yayınları TYT Deneme Sınavı"
-      
-      if (selectedSinav === burslulukSinavi) {
-        // Bursluluk sınavı için 4-11. sınıflar (12. sınıf hariç)
-        return rizeSiniflar.filter(sinif => sinif !== '12. Sınıf')
-      } else if (selectedSinav === martTytDeneme) {
-        // 14 Mart TYT denemesi için 11-12. sınıf ve mezun
-        return ['11. Sınıf', '12. Sınıf', 'Mezun']
-      } else {
-        // Diğer sınavlar için sadece 12. sınıf ve mezun
-        return ['12. Sınıf', 'Mezun']
-      }
-    }
-    
-    // Varsayılan olarak tüm Rize sınıfları
-    return rizeSiniflar
-  }, [selectedSube, selectedSinav])
-  
+
   // Filtrelenmiş okul listesi (arama ile)
   const filteredOkullar = useMemo(() => {
     if (!okulSearch) return okullar
@@ -1083,17 +1060,34 @@ export default function HomePage() {
   const selectedBabaMeslek = watch('babaMeslek')
   const selectedAnneMeslek = watch('anneMeslek')
   const watchedSinavSecimi = watch('sinavSecimi')
-  
-  // Sınav seçimi değiştiğinde state'i güncelle
+
   useEffect(() => {
-    if (watchedSinavSecimi !== selectedSinav) {
-      setSelectedSinav(watchedSinavSecimi || '')
-      // Sınav değiştiğinde sınıf seçimini sıfırla
-      if (watchedSinavSecimi) {
-        setValue('ogrenciSinifi', '')
-      }
+    if (selectedSube === 'Rize') {
+      setValue('sinavSecimi', rizeSinavSecenekleri[0])
+    } else if (selectedSube === 'Trabzon') {
+      setValue('sinavSecimi', '')
     }
-  }, [watchedSinavSecimi, selectedSinav, setValue])
+  }, [selectedSube, setValue])
+
+  const siniflar = useMemo(() => {
+    if (selectedSube === 'Trabzon') {
+      return trabzonSiniflar
+    }
+
+    if (selectedSube === 'Rize' && watchedSinavSecimi) {
+      const burslulukSinavi = "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)"
+
+      if (watchedSinavSecimi === burslulukSinavi) {
+        return rizeSiniflar.filter(sinif => sinif !== '12. Sınıf')
+      }
+      if (watchedSinavSecimi === rizeMayisTyTSinavMetni) {
+        return ['11. Sınıf', '12. Sınıf', 'Mezun']
+      }
+      return ['12. Sınıf', 'Mezun']
+    }
+
+    return rizeSiniflar
+  }, [selectedSube, watchedSinavSecimi])
 
   // Filtrelenmiş baba meslek listesi
   const filteredBabaMeslekler = useMemo(() => {
@@ -1143,7 +1137,9 @@ export default function HomePage() {
       setAnneMeslekSearch('')
       setOkulSearch('')
       setKvkkOnay(false)
-      setSelectedSinav('')
+      if (selectedSube === 'Rize') {
+        setValue('sinavSecimi', rizeSinavSecenekleri[0])
+      }
       // Sayfanın en üstüne scroll yap
       window.scrollTo({ top: 0, behavior: 'smooth' })
       // Şube seçimini sıfırlama - kullanıcı butona tıklayınca sıfırlanacak
@@ -1599,15 +1595,8 @@ export default function HomePage() {
                     </label>
                     <select
                       {...register('sinavSecimi')}
-                      onChange={(e) => {
-                        setValue('sinavSecimi', e.target.value)
-                        setSelectedSinav(e.target.value)
-                        // Sınav değiştiğinde sınıf seçimini sıfırla
-                        setValue('ogrenciSinifi', '')
-                      }}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 bg-gray-50"
                     >
-                      <option value="">Önce sınav seçiniz</option>
                       {rizeSinavSecenekleri.map((sinav) => (
                         <option key={sinav} value={sinav}>
                           {sinav}
@@ -1617,35 +1606,26 @@ export default function HomePage() {
                     {errors.sinavSecimi && (
                       <p className="mt-1 text-sm text-red-600">{errors.sinavSecimi.message}</p>
                     )}
-                    {selectedSinav && (
-                      <p className="mt-2 text-sm text-gray-600">
-                        {selectedSinav === "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)"
-                          ? "✓ Bu sınav için 4-11. sınıflar arasından seçim yapabilirsiniz."
-                          : selectedSinav === "14 Mart Karbon Kursa Özel Türkiye Geneli Bilgi Sarmalı Yayınları TYT Deneme Sınavı"
-                            ? "✓ Bu sınav için 11-12. sınıf veya mezun seçebilirsiniz."
-                            : "✓ Bu sınav için sadece 12. sınıf veya mezun seçebilirsiniz."}
-                      </p>
-                    )}
+                    <p className="mt-2 text-sm text-gray-600">
+                      ✓ Bu sınav için 11-12. sınıf veya mezun seçebilirsiniz.
+                    </p>
                   </div>
                 )}
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Sınıf <span className="text-red-500">*</span>
-                    {selectedSube === 'Rize' && !selectedSinav && (
-                      <span className="ml-2 text-xs text-orange-600">(Önce sınav seçiniz)</span>
-                    )}
                   </label>
                   <select
                     {...register('ogrenciSinifi')}
-                    disabled={selectedSube === 'Rize' && !selectedSinav}
+                    disabled={selectedSube === 'Rize' && !watchedSinavSecimi}
                     className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 ${
-                      selectedSube === 'Rize' && !selectedSinav ? 'bg-gray-100 cursor-not-allowed' : ''
+                      selectedSube === 'Rize' && !watchedSinavSecimi ? 'bg-gray-100 cursor-not-allowed' : ''
                     }`}
                   >
                     <option value="">
-                      {selectedSube === 'Rize' && !selectedSinav 
-                        ? 'Önce sınav seçiniz' 
+                      {selectedSube === 'Rize' && !watchedSinavSecimi
+                        ? 'Sınav yükleniyor…'
                         : 'Seçiniz'}
                     </option>
                     {siniflar.map((sinif) => (
