@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
+import { isMissingArsivlendiError } from "@/lib/basvuru-arsiv-db"
 
 const bodySchema = z.object({
   ids: z.array(z.string().min(1)).min(1, "En az bir başvuru seçmelisiniz"),
@@ -50,13 +51,14 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error("Arşivleme hatası:", error)
-    if (error && typeof error === "object" && "code" in error) {
-      if (error.code === "P2022") {
-        return NextResponse.json(
-          { error: "Veritabanı şeması güncel değil. Lütfen arsivlendi sütununu ekleyin." },
-          { status: 503 }
-        )
-      }
+    if (isMissingArsivlendiError(error)) {
+      return NextResponse.json(
+        {
+          error:
+            "Veritabanında arşiv sütunu yok. Sunucuda migration çalıştırın: npx prisma migrate deploy",
+        },
+        { status: 503 }
+      )
     }
     return NextResponse.json({ error: "Arşivleme sırasında bir hata oluştu" }, { status: 500 })
   }

@@ -3,6 +3,11 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { Prisma } from "@prisma/client"
 import * as XLSX from "xlsx"
+import {
+  basvuruSelectAdminWithArsiv,
+  basvuruSelectAdminWithoutArsiv,
+  isMissingArsivlendiError,
+} from "@/lib/basvuru-arsiv-db"
 
 export async function GET(request: Request) {
   try {
@@ -23,12 +28,15 @@ export async function GET(request: Request) {
     const okul = searchParams.get('okul')
     const sinav = searchParams.get('sinav')
     const arsivParam = searchParams.get('arsiv')
+    /** Yalnızca `arsiv=true` arşiv Excel’idir; aksi halde ana liste (arsivlendi=false). */
+    const sadeceArsivExport = arsivParam === 'true'
 
     // Admin kullanıcısının şubesine göre filtreleme
     const kurumSube = session.user.kurumSube
 
-    const arsivKosulu: Prisma.BasvuruWhereInput =
-      arsivParam === 'true' ? { arsivlendi: true } : { arsivlendi: false }
+    const arsivKosulu: Prisma.BasvuruWhereInput = sadeceArsivExport
+      ? { arsivlendi: true }
+      : { arsivlendi: false }
 
     const subeOr: Prisma.BasvuruWhereInput = {
       OR: [
@@ -42,7 +50,7 @@ export async function GET(request: Request) {
       ],
     }
 
-    const andParts: Prisma.BasvuruWhereInput[] = [subeOr, arsivKosulu]
+    const andPartsNoArsiv: Prisma.BasvuruWhereInput[] = [subeOr]
 
     if (tarihBaslangic || tarihBitis) {
       const createdAt: Prisma.DateTimeFilter = {}
@@ -52,31 +60,64 @@ export async function GET(request: Request) {
       if (tarihBitis) {
         createdAt.lte = new Date(tarihBitis + 'T23:59:59')
       }
-      andParts.push({ createdAt })
+      andPartsNoArsiv.push({ createdAt })
     }
 
     if (sinif) {
-      andParts.push({ ogrenciSinifi: sinif })
+      andPartsNoArsiv.push({ ogrenciSinifi: sinif })
     }
 
     if (okul) {
-      andParts.push({ okul })
+      andPartsNoArsiv.push({ okul })
     }
 
-    let queryWhere: Prisma.BasvuruWhereInput = { AND: andParts }
+    let queryWhereNoArsiv: Prisma.BasvuruWhereInput = { AND: andPartsNoArsiv }
 
     if (kurumSube === 'Rize' && sinav) {
       const sinavKosulu: Prisma.BasvuruWhereInput =
         sinav === 'Belirtilmedi'
           ? { OR: [{ sinavSecimi: null }, { sinavSecimi: '' }] }
           : { sinavSecimi: sinav }
-      queryWhere = { AND: [...andParts, sinavKosulu] }
+      queryWhereNoArsiv = { AND: [...andPartsNoArsiv, sinavKosulu] }
     }
 
-    const basvurular = await prisma.basvuru.findMany({
-      where: queryWhere,
-      orderBy: { createdAt: 'desc' }
+    const andPartsWithArsiv: Prisma.BasvuruWhereInput[] = [subeOr, arsivKosulu, ...andPartsNoArsiv.slice(1)]
+    let queryWhereWithArsiv: Prisma.BasvuruWhereInput = { AND: andPartsWithArsiv }
+    if (kurumSube === 'Rize' && sinav) {
+      const sinavKosulu: Prisma.BasvuruWhereInput =
+        sinav === 'Belirtilmedi'
+          ? { OR: [{ sinavSecimi: null }, { sinavSecimi: '' }] }
+          : { sinavSecimi: sinav }
+      queryWhereWithArsiv = { AND: [...andPartsWithArsiv, sinavKosulu] }
+    }
+
+    let basvurular: Prisma.BasvuruGetPayload<{ select: typeof basvuruSelectAdminWithArsiv }>[]
+    try {
+      basvurular = await prisma.basvuru.findMany({
+        where: queryWhereWithArsiv,
+        orderBy: { createdAt: 'desc' },
+        select: basvuruSelectAdminWithArsiv,
+      })
+    } catch (e) {
+      if (!isMissingArsivlendiError(e)) throw e
+      basvurular = await prisma.basvuru.findMany({
+        where: queryWhereNoArsiv,
+        orderBy: { createdAt: 'desc' },
+        select: basvuruSelectAdminWithoutArsiv,
+      })
+      if (sadeceArsivExport) {
+        basvurular = []
+      }
+    }
+
+    basvurular = basvurular.filter((b) => {
+      const arsiv = typeof b.arsivlendi === 'boolean' ? b.arsivlendi : false
+      return sadeceArsivExport ? arsiv : !arsiv
     })
+
+    const sheetAdi = sadeceArsivExport ? 'Arsiv Basvurular' : 'Ana Basvurular'
+    const dosyaOncelik = sadeceArsivExport ? 'arsiv-basvurular' : 'ana-basvurular'
+    const gun = new Date().toISOString().split('T')[0]
 
     // Excel için veriyi hazırla
     const excelData = basvurular.map((b, index) => ({
@@ -114,7 +155,7 @@ export async function GET(request: Request) {
     // Excel workbook oluştur
     const ws = XLSX.utils.json_to_sheet(excelData)
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, "Başvurular")
+    XLSX.utils.book_append_sheet(wb, ws, sheetAdi.slice(0, 31))
 
     // Buffer'a çevir
     const excelBuffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
@@ -123,7 +164,7 @@ export async function GET(request: Request) {
     return new NextResponse(excelBuffer, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition': `attachment; filename="basvurular-${new Date().toISOString().split('T')[0]}.xlsx"`,
+        'Content-Disposition': `attachment; filename="${dosyaOncelik}-${gun}.xlsx"`,
         'Cache-Control': 'no-store, no-cache, must-revalidate',
         'Pragma': 'no-cache',
       },

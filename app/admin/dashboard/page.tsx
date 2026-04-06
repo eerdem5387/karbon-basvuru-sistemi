@@ -112,6 +112,7 @@ export default function AdminDashboard() {
       setIsExporting(true)
       // Paneldeki filtrelerle aynı veriyi export et (Excel panelde gördüğünle aynı olsun)
       const params = new URLSearchParams()
+      params.set('arsiv', 'false')
       if (filterTarihBaslangic) params.append('tarihBaslangic', filterTarihBaslangic)
       if (filterTarihBitis) params.append('tarihBitis', filterTarihBitis)
       if (filterSinif) params.append('sinif', filterSinif)
@@ -132,7 +133,7 @@ export default function AdminDashboard() {
       const a = document.createElement('a')
       a.href = url
       const filterSuffix = (filterTarihBaslangic || filterTarihBitis || filterSinif || filterOkul || filterSinav) ? '-filtrelenmis' : ''
-      a.download = `basvurular${filterSuffix}-${new Date().toISOString().split('T')[0]}.xlsx`
+      a.download = `ana-basvurular${filterSuffix}-${new Date().toISOString().split('T')[0]}.xlsx`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
