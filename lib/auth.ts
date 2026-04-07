@@ -16,8 +16,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw new Error("Email ve şifre gerekli")
           }
 
-          const admin = await prisma.admin.findUnique({
-            where: { email: credentials.email as string }
+          const emailNormalized = (credentials.email as string).trim().toLowerCase()
+
+          const admin = await prisma.admin.findFirst({
+            where: {
+              email: { equals: emailNormalized, mode: "insensitive" },
+            },
           })
 
           if (!admin) {
