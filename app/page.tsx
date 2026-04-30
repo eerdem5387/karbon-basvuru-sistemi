@@ -1246,7 +1246,7 @@ export default function HomePage() {
                     RİZE
                   </h4>
                   <p className="text-[10px] sm:text-sm md:text-base text-gray-600 mb-2 sm:mb-4 md:mb-6 hidden sm:block">
-                    Rize şubemize bursluluk sınavı başvurusu yapmak için tıklayın
+                    2 Mayıs sınavı başvuru durumu ve bilgilendirme için tıklayın
                   </p>
                   <div className="inline-flex items-center text-green-600 font-semibold text-xs sm:text-sm md:text-base group-hover:gap-3 gap-1 sm:gap-2 transition-all">
                     <span>Başvuru</span>
@@ -1342,7 +1342,64 @@ export default function HomePage() {
     )
   }
 
-  // Başvuru Formu (Şube seçildikten sonra)
+  // Rize: başvuru formu kapalı — bilgilendirme ekranı
+  if (selectedSube === 'Rize') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+        <header className="bg-white shadow-md">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <button
+                type="button"
+                onClick={() => setSelectedSube(null)}
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="font-medium">Şube Seçimi</span>
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="relative h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0">
+                  <Image src="/logo.png" alt="Karbon Kurs Plus Logo" width={80} height={80} className="h-full w-full object-contain" />
+                </div>
+                <div className="text-left">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-indigo-700">Karbon Kurs Plus</h2>
+                  <p className="text-lg font-semibold text-green-600">Rize Şubesi</p>
+                </div>
+              </div>
+              <div className="w-20 hidden sm:block" aria-hidden />
+            </div>
+          </div>
+        </header>
+
+        <main className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="bg-white rounded-2xl shadow-xl border border-green-100 overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+              <h1 className="text-xl sm:text-2xl font-bold text-white text-center">Başvurular Tamamlandı</h1>
+            </div>
+            <div className="p-8 sm:p-10">
+              <p className="text-gray-800 text-lg sm:text-xl leading-relaxed text-center font-medium">
+                2 Mayıs Sınavı için Başvurularımız Dolmuştur. Katılımınız ve İlginiz için Teşekkür Ederiz. Sınav Giriş
+                Bilgileriniz Tarafınıza SMS ile gönderilecektir.
+              </p>
+            </div>
+          </motion.div>
+        </main>
+
+        <div className="text-center text-gray-600 text-sm py-8">
+          <p>© 2025 Karbon Kurs Plus Başvuru Sistemi. Tüm hakları saklıdır.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Başvuru Formu (Trabzon şubesi)
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
@@ -1587,47 +1644,15 @@ export default function HomePage() {
                   )}
                 </div>
 
-                {/* Rize için Sınav Seçimi */}
-                {selectedSube === 'Rize' && (
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Katılmak İstediğiniz Sınav <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      {...register('sinavSecimi')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 bg-gray-50"
-                    >
-                      {rizeSinavSecenekleri.map((sinav) => (
-                        <option key={sinav} value={sinav}>
-                          {sinav}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.sinavSecimi && (
-                      <p className="mt-1 text-sm text-red-600">{errors.sinavSecimi.message}</p>
-                    )}
-                    <p className="mt-2 text-sm text-gray-600">
-                      ✓ Bu sınav için 11-12. sınıf veya mezun seçebilirsiniz.
-                    </p>
-                  </div>
-                )}
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Sınıf <span className="text-red-500">*</span>
                   </label>
                   <select
                     {...register('ogrenciSinifi')}
-                    disabled={selectedSube === 'Rize' && !watchedSinavSecimi}
-                    className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 ${
-                      selectedSube === 'Rize' && !watchedSinavSecimi ? 'bg-gray-100 cursor-not-allowed' : ''
-                    }`}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
                   >
-                    <option value="">
-                      {selectedSube === 'Rize' && !watchedSinavSecimi
-                        ? 'Sınav yükleniyor…'
-                        : 'Seçiniz'}
-                    </option>
+                    <option value="">Seçiniz</option>
                     {siniflar.map((sinif) => (
                       <option key={sinif} value={sinif}>
                         {sinif}

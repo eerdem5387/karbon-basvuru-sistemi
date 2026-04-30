@@ -41,7 +41,17 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    
+
+    if (body && typeof body === "object" && (body as { kurumSube?: string }).kurumSube === "Rize") {
+      return NextResponse.json(
+        {
+          error:
+            "2 Mayıs Sınavı için başvurularımız dolmuştur. Katılımınız ve ilginiz için teşekkür ederiz. Sınav giriş bilgileriniz tarafınıza SMS ile gönderilecektir.",
+        },
+        { status: 403 }
+      )
+    }
+
     // Validasyon
     const validatedData = basvuruSchema.parse(body)
     
