@@ -23,11 +23,10 @@ export const tcKimlikValidator = (tc: string): boolean => {
   return true
 }
 
-// 2 Mayıs TYT Son Prova (Rize aktif sınav)
-export const rizeMayisTyTSinavMetni =
-  "2 Mayıs 3,4,5 yayınları Türkiye Geneli TYT Son Prova (ücretsiz)" as const
+// Rize aktif sınav (tek seçenek)
+export const rizeHaziranUnlulerKarmasiMetni = "6 Haziran - Ünlüler Karması" as const
 
-export const rizeSinavSecenekleri = [rizeMayisTyTSinavMetni] as const
+export const rizeSinavSecenekleri = [rizeHaziranUnlulerKarmasiMetni] as const
 
 export const basvuruSchema = z.object({
   ogrenciAdSoyad: z.string()
@@ -102,35 +101,19 @@ export const basvuruSchema = z.object({
     })
   }
   
-  // Sınav seçimine göre sınıf kontrolü
   if (data.kurumSube === "Rize" && data.sinavSecimi) {
-    const burslulukSinavi = "7 Şubat 4,5,6,7,8,9,10,11. sınıflar bursluluk sınavı (ücretsiz)"
-
-    if (data.sinavSecimi === burslulukSinavi) {
-      if (data.ogrenciSinifi === "12. Sınıf") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Bu sınav için 12. sınıf seçilemez. Lütfen 4-11. sınıflar arasından seçim yapın.",
-          path: ["ogrenciSinifi"],
-        })
-      }
-    } else if (data.sinavSecimi === rizeMayisTyTSinavMetni) {
-      const izinliMayis = new Set(["11. Sınıf", "12. Sınıf", "Mezun"])
-      if (!izinliMayis.has(data.ogrenciSinifi)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Bu sınav için sadece 11-12. sınıf veya mezun seçilebilir.",
-          path: ["ogrenciSinifi"],
-        })
-      }
-    } else {
-      if (data.ogrenciSinifi !== "12. Sınıf" && data.ogrenciSinifi !== "Mezun") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Bu sınav için sadece 12. sınıf veya mezun seçilebilir.",
-          path: ["ogrenciSinifi"],
-        })
-      }
+    if (data.sinavSecimi !== rizeHaziranUnlulerKarmasiMetni) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Geçersiz sınav seçimi.",
+        path: ["sinavSecimi"],
+      })
+    } else if (data.ogrenciSinifi !== "7. Sınıf") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Bu sınav için sadece 7. sınıf seçilebilir.",
+        path: ["ogrenciSinifi"],
+      })
     }
   }
 })
