@@ -6,11 +6,10 @@ import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { rizeSinavSecenekleri } from '@/lib/validations'
 import type { AdminBasvuru } from '@/lib/admin-basvuru'
 import { BasvuruDetailModal } from '@/components/admin/BasvuruDetailModal'
 
-export default function AdminArsivPage() {
+export default function AdminYedekPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [basvurular, setBasvurular] = useState<AdminBasvuru[]>([])
@@ -25,26 +24,24 @@ export default function AdminArsivPage() {
   const [filterSinav, setFilterSinav] = useState('')
   const [showFilters, setShowFilters] = useState(false)
 
-  const isRize = session?.user?.kurumSube === 'Rize'
-
-  const bugunTurkey = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Istanbul' })
-
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/admin/login')
+    } else if (status === 'authenticated' && session?.user?.kurumSube !== 'Rize') {
+      router.push('/admin/dashboard')
     }
-  }, [status, router])
+  }, [status, session, router])
 
   const fetchBasvurular = async () => {
     try {
       setIsLoading(true)
-      const response = await fetch(`/api/admin/basvurular?arsiv=true&_t=${Date.now()}`, {
+      const response = await fetch(`/api/admin/basvurular?yedek=true&_t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
       })
 
       if (!response.ok) {
-        throw new Error('Arşiv yüklenemedi')
+        throw new Error('Yedek listesi yüklenemedi')
       }
 
       const data = await response.json()
@@ -52,11 +49,7 @@ export default function AdminArsivPage() {
 
       if (selectedBasvuru) {
         const updated = data.find((b: AdminBasvuru) => b.id === selectedBasvuru.id)
-        if (updated) {
-          setSelectedBasvuru(updated)
-        } else {
-          setSelectedBasvuru(null)
-        }
+        setSelectedBasvuru(updated ?? null)
       }
     } catch {
       setBasvurular([])
@@ -66,21 +59,21 @@ export default function AdminArsivPage() {
   }
 
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (status === 'authenticated' && session?.user?.kurumSube === 'Rize') {
       fetchBasvurular()
     }
-  }, [status])
+  }, [status, session?.user?.kurumSube])
 
   const handleExport = async () => {
     try {
       setIsExporting(true)
       const params = new URLSearchParams()
-      params.set('arsiv', 'true')
+      params.set('yedek', 'true')
       if (filterTarihBaslangic) params.append('tarihBaslangic', filterTarihBaslangic)
       if (filterTarihBitis) params.append('tarihBitis', filterTarihBitis)
       if (filterSinif) params.append('sinif', filterSinif)
       if (filterOkul) params.append('okul', filterOkul)
-      if (isRize && filterSinav) params.append('sinav', filterSinav)
+      if (filterSinav) params.append('sinav', filterSinav)
       params.set('_t', String(Date.now()))
       const response = await fetch(`/api/admin/export?${params.toString()}`, {
         cache: 'no-store',
@@ -95,8 +88,11 @@ export default function AdminArsivPage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      const filterSuffix = (filterTarihBaslangic || filterTarihBitis || filterSinif || filterOkul || filterSinav) ? '-filtrelenmis' : ''
-      a.download = `arsiv-basvurular${filterSuffix}-${new Date().toISOString().split('T')[0]}.xlsx`
+      const filterSuffix =
+        filterTarihBaslangic || filterTarihBitis || filterSinif || filterOkul || filterSinav
+          ? '-filtrelenmis'
+          : ''
+      a.download = `yedek-basvurular${filterSuffix}-${new Date().toISOString().split('T')[0]}.xlsx`
       document.body.appendChild(a)
       a.click()
       window.URL.revokeObjectURL(url)
@@ -123,6 +119,13 @@ export default function AdminArsivPage() {
 
   const uniqueOkullar = Array.from(new Set(basvurular.map((b) => b.okul))).sort()
   const uniqueSiniflar = Array.from(new Set(basvurular.map((b) => b.ogrenciSinifi))).sort()
+  const uniqueSinavlar = useMemo(
+    () =>
+      Array.from(
+        new Set(basvurular.map((b) => b.sinavSecimi?.trim() || 'Belirtilmedi'))
+      ).sort(),
+    [basvurular]
+  )
 
   const filteredBasvurular = basvurular.filter((b) => {
     const search = searchTerm.toLowerCase()
@@ -139,9 +142,8 @@ export default function AdminArsivPage() {
 
     const matchesSinif = !filterSinif || b.ogrenciSinifi === filterSinif
     const matchesOkul = !filterOkul || b.okul === filterOkul
-    const matchesSinav =
-      !filterSinav ||
-      (filterSinav === 'Belirtilmedi' ? !b.sinavSecimi?.trim() : b.sinavSecimi === filterSinav)
+    const sinavKey = b.sinavSecimi?.trim() || 'Belirtilmedi'
+    const matchesSinav = !filterSinav || sinavKey === filterSinav
 
     return matchesSearch && matchesTarihBaslangic && matchesTarihBitis && matchesSinif && matchesOkul && matchesSinav
   })
@@ -150,14 +152,14 @@ export default function AdminArsivPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-amber-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-slate-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Yükleniyor...</p>
         </div>
       </div>
     )
   }
 
-  if (status === 'unauthenticated') {
+  if (status === 'unauthenticated' || session?.user?.kurumSube !== 'Rize') {
     return null
   }
 
@@ -167,9 +169,9 @@ export default function AdminArsivPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-wrap justify-between items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Arşivlenmiş başvurular</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Yedek — eski sınav başvuruları</h1>
               <p className="text-sm text-gray-600">
-                {session?.user?.kurumSube} şubesi — ana listede gizli, veri silinmedi
+                Güncel olmayan sınavlara yapılan başvurular. Ana listede görünmez; veri silinmedi.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -185,7 +187,7 @@ export default function AdminArsivPage() {
                 disabled={isExporting || basvurular.length === 0}
                 className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isExporting ? 'İndiriliyor…' : 'Excel (arşiv)'}
+                {isExporting ? 'İndiriliyor…' : 'Excel (yedek)'}
               </button>
               <button
                 type="button"
@@ -202,18 +204,12 @@ export default function AdminArsivPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-sm font-medium text-gray-600">Arşivdeki toplam</p>
+            <p className="text-sm font-medium text-gray-600">Yedekteki toplam</p>
             <p className="text-2xl font-bold text-gray-900">{basvurular.length}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
-            <p className="text-sm font-medium text-gray-600">Bugünkü başvuru tarihi (arşivde)</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {basvurular.filter(
-                (b) =>
-                  new Date(b.createdAt).toLocaleDateString('en-CA', { timeZone: 'Europe/Istanbul' }) ===
-                  bugunTurkey
-              ).length}
-            </p>
+            <p className="text-sm font-medium text-gray-600">Farklı sınav türü</p>
+            <p className="text-2xl font-bold text-gray-900">{uniqueSinavlar.length}</p>
           </div>
           <div className="bg-white rounded-lg shadow p-6">
             <p className="text-sm font-medium text-gray-600">Filtrelenen</p>
@@ -229,7 +225,7 @@ export default function AdminArsivPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Öğrenci adı, TC, email veya okul ile ara..."
-                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-transparent"
               />
               <svg
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
@@ -243,7 +239,7 @@ export default function AdminArsivPage() {
             <button
               type="button"
               onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition duration-200"
+              className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition duration-200"
             >
               Filtrele
             </button>
@@ -313,23 +309,21 @@ export default function AdminArsivPage() {
                     ))}
                   </select>
                 </div>
-                {isRize && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Sınav</label>
-                    <select
-                      value={filterSinav}
-                      onChange={(e) => setFilterSinav(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option value="">Tümü</option>
-                      {rizeSinavSecenekleri.map((sinav) => (
-                        <option key={sinav} value={sinav}>
-                          {sinav}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Eski sınav</label>
+                  <select
+                    value={filterSinav}
+                    onChange={(e) => setFilterSinav(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="">Tümü</option>
+                    {uniqueSinavlar.map((sinav) => (
+                      <option key={sinav} value={sinav}>
+                        {sinav.length > 70 ? `${sinav.slice(0, 70)}…` : sinav}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </motion.div>
           )}
@@ -342,9 +336,7 @@ export default function AdminArsivPage() {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Öğrenci</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Okul / Sınıf</th>
-                  {isRize && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sınav</th>
-                  )}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Eski sınav</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">İletişim</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tarih</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">İşlem</th>
@@ -353,8 +345,8 @@ export default function AdminArsivPage() {
               <tbody className="divide-y divide-gray-200">
                 {filteredBasvurular.length === 0 ? (
                   <tr>
-                    <td colSpan={isRize ? 6 : 5} className="px-6 py-12 text-center text-gray-500">
-                      {basvurular.length === 0 ? 'Arşivde kayıt yok.' : 'Filtreye uygun kayıt yok.'}
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      {basvurular.length === 0 ? 'Yedekte kayıt yok.' : 'Filtreye uygun kayıt yok.'}
                     </td>
                   </tr>
                 ) : (
@@ -376,13 +368,11 @@ export default function AdminArsivPage() {
                         </div>
                         <div className="text-sm text-gray-500">{basvuru.ogrenciSinifi}</div>
                       </td>
-                      {isRize && (
-                        <td className="px-6 py-4 max-w-xs">
-                          <div className="text-sm text-gray-900 truncate" title={basvuru.sinavSecimi || '—'}>
-                            {basvuru.sinavSecimi || '—'}
-                          </div>
-                        </td>
-                      )}
+                      <td className="px-6 py-4 max-w-xs">
+                        <div className="text-sm text-gray-900 truncate" title={basvuru.sinavSecimi || 'Belirtilmedi'}>
+                          {basvuru.sinavSecimi || 'Belirtilmedi'}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">{basvuru.email}</div>
                         <div className="text-sm text-gray-500">{basvuru.babaCepTel}</div>
@@ -394,7 +384,7 @@ export default function AdminArsivPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedBasvuru(basvuru)}
-                          className="text-amber-700 hover:text-amber-900 font-medium text-sm"
+                          className="text-slate-700 hover:text-slate-900 font-medium text-sm"
                         >
                           Detay
                         </button>

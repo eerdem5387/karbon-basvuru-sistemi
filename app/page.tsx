@@ -8,6 +8,7 @@ import {
   type BasvuruFormData,
   rizeSinavSecenekleri,
 } from '@/lib/validations'
+import { getRizeSinavByMetin, getSiniflarForRizeSinav } from '@/lib/rize-sinavlar'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -1061,22 +1062,25 @@ export default function HomePage() {
   const watchedSinavSecimi = watch('sinavSecimi')
 
   useEffect(() => {
-    if (selectedSube === 'Rize') {
-      setValue('sinavSecimi', rizeSinavSecenekleri[0])
-    } else if (selectedSube === 'Trabzon') {
+    if (selectedSube === 'Trabzon') {
       setValue('sinavSecimi', '')
+    } else if (selectedSube === 'Rize') {
+      setValue('sinavSecimi', '')
+      setValue('ogrenciSinifi', '')
     }
   }, [selectedSube, setValue])
+
+  const seciliRizeSinav = getRizeSinavByMetin(watchedSinavSecimi)
 
   const siniflar = useMemo(() => {
     if (selectedSube === 'Trabzon') {
       return trabzonSiniflar
     }
-    if (selectedSube === 'Rize') {
-      return ['7. Sınıf']
+    if (selectedSube === 'Rize' && watchedSinavSecimi) {
+      return getSiniflarForRizeSinav(watchedSinavSecimi)
     }
     return rizeSiniflar
-  }, [selectedSube])
+  }, [selectedSube, watchedSinavSecimi])
 
   // Filtrelenmiş baba meslek listesi
   const filteredBabaMeslekler = useMemo(() => {
@@ -1127,7 +1131,8 @@ export default function HomePage() {
       setOkulSearch('')
       setKvkkOnay(false)
       if (selectedSube === 'Rize') {
-        setValue('sinavSecimi', rizeSinavSecenekleri[0])
+        setValue('sinavSecimi', '')
+        setValue('ogrenciSinifi', '')
       }
       // Sayfanın en üstüne scroll yap
       window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -1235,7 +1240,7 @@ export default function HomePage() {
                     RİZE
                   </h4>
                   <p className="text-[10px] sm:text-sm md:text-base text-gray-600 mb-2 sm:mb-4 md:mb-6 hidden sm:block">
-                    6 Haziran Ünlüler Karması sınav başvurusu için tıklayın
+                    10 Ekim hazır bulunuşluk sınavları başvurusu için tıklayın
                   </p>
                   <div className="inline-flex items-center text-green-600 font-semibold text-xs sm:text-sm md:text-base group-hover:gap-3 gap-1 sm:gap-2 transition-all">
                     <span>Başvuru</span>
@@ -1583,8 +1588,13 @@ export default function HomePage() {
                     </label>
                     <select
                       {...register('sinavSecimi')}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 bg-gray-50"
+                      onChange={(e) => {
+                        setValue('sinavSecimi', e.target.value)
+                        setValue('ogrenciSinifi', '')
+                      }}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200"
                     >
+                      <option value="">Sınav seçiniz</option>
                       {rizeSinavSecenekleri.map((sinav) => (
                         <option key={sinav} value={sinav}>
                           {sinav}
@@ -1594,9 +1604,16 @@ export default function HomePage() {
                     {errors.sinavSecimi && (
                       <p className="mt-1 text-sm text-red-600">{errors.sinavSecimi.message}</p>
                     )}
-                    <p className="mt-2 text-sm text-gray-600">
-                      ✓ Bu sınav için yalnızca 7. sınıf seçebilirsiniz.
-                    </p>
+                    {seciliRizeSinav && (
+                      <div className="mt-3 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-gray-700 space-y-1">
+                        <p><span className="font-medium">Tarih:</span> {seciliRizeSinav.tarih}</p>
+                        <p><span className="font-medium">Saat:</span> {seciliRizeSinav.saat}</p>
+                        <p><span className="font-medium">Yer:</span> {seciliRizeSinav.yer}</p>
+                        <p className="pt-1 text-green-800">
+                          ✓ Bu sınav için {seciliRizeSinav.siniflar.join(', ')} seçebilirsiniz.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1604,7 +1621,7 @@ export default function HomePage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Sınıf <span className="text-red-500">*</span>
                     {selectedSube === 'Rize' && !watchedSinavSecimi && (
-                      <span className="ml-2 text-xs text-orange-600">(Önce sınav yükleniyor)</span>
+                      <span className="ml-2 text-xs text-orange-600">(Önce sınav seçiniz)</span>
                     )}
                   </label>
                   <select
@@ -1615,7 +1632,7 @@ export default function HomePage() {
                     }`}
                   >
                     <option value="">
-                      {selectedSube === 'Rize' && !watchedSinavSecimi ? 'Sınav yükleniyor…' : 'Seçiniz'}
+                      {selectedSube === 'Rize' && !watchedSinavSecimi ? 'Önce sınav seçiniz' : 'Seçiniz'}
                     </option>
                     {siniflar.map((sinif) => (
                       <option key={sinif} value={sinif}>

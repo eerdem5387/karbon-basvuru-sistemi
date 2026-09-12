@@ -1,4 +1,12 @@
 import { z } from "zod"
+import {
+  getRizeSinavByMetin,
+  getSiniflarForRizeSinav,
+  isAktifRizeSinav,
+  rizeSinavSecenekleri,
+} from "@/lib/rize-sinavlar"
+
+export { rizeSinavSecenekleri } from "@/lib/rize-sinavlar"
 
 // TC Kimlik No validasyonu
 export const tcKimlikValidator = (tc: string): boolean => {
@@ -23,11 +31,6 @@ export const tcKimlikValidator = (tc: string): boolean => {
   return true
 }
 
-// Rize aktif sınav (tek seçenek)
-export const rizeHaziranUnlulerKarmasiMetni = "6 Haziran - Ünlüler Karması" as const
-
-export const rizeSinavSecenekleri = [rizeHaziranUnlulerKarmasiMetni] as const
-
 export const basvuruSchema = z.object({
   ogrenciAdSoyad: z.string()
     .min(3, "Öğrenci adı soyadı en az 3 karakter olmalıdır")
@@ -47,7 +50,6 @@ export const basvuruSchema = z.object({
   
   kurumSube: z.enum(["Rize", "Trabzon"]).optional(),
   
-  // Rize için sınav seçimi (opsiyonel - frontend'de kontrol edilecek)
   sinavSecimi: z.string().optional(),
   
   babaAdSoyad: z.string()
@@ -92,7 +94,6 @@ export const basvuruSchema = z.object({
     .email("Geçerli bir e-posta adresi giriniz")
     .toLowerCase(),
 }).superRefine((data, ctx) => {
-  // Rize için sınav seçimi zorunlu
   if (data.kurumSube === "Rize" && !data.sinavSecimi) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -102,16 +103,24 @@ export const basvuruSchema = z.object({
   }
   
   if (data.kurumSube === "Rize" && data.sinavSecimi) {
-    if (data.sinavSecimi !== rizeHaziranUnlulerKarmasiMetni) {
+    if (!isAktifRizeSinav(data.sinavSecimi)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Geçersiz sınav seçimi.",
         path: ["sinavSecimi"],
       })
-    } else if (data.ogrenciSinifi !== "7. Sınıf") {
+      return
+    }
+
+    const izinliSiniflar = getSiniflarForRizeSinav(data.sinavSecimi)
+    if (!izinliSiniflar.includes(data.ogrenciSinifi)) {
+      const sinav = getRizeSinavByMetin(data.sinavSecimi)
+      const liste = izinliSiniflar.join(", ")
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Bu sınav için sadece 7. sınıf seçilebilir.",
+        message: sinav
+          ? `Bu sınav için sadece ${liste} seçilebilir.`
+          : "Geçersiz sınıf seçimi.",
         path: ["ogrenciSinifi"],
       })
     }
@@ -119,4 +128,3 @@ export const basvuruSchema = z.object({
 })
 
 export type BasvuruFormData = z.infer<typeof basvuruSchema>
-

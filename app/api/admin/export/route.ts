@@ -8,6 +8,12 @@ import {
   basvuruSelectAdminWithoutArsiv,
   isMissingArsivlendiError,
 } from "@/lib/basvuru-arsiv-db"
+import {
+  anaListeBasvurusu,
+  arsivBasvurusu,
+  basvuruSubeEslesir,
+  yedekBasvurusu,
+} from "@/lib/admin-basvuru-filter"
 
 export async function GET(request: Request) {
   try {
@@ -28,8 +34,9 @@ export async function GET(request: Request) {
     const okul = searchParams.get('okul')
     const sinav = searchParams.get('sinav')
     const arsivParam = searchParams.get('arsiv')
-    /** Yalnızca `arsiv=true` arşiv Excel’idir; aksi halde ana liste (arsivlendi=false). */
+    const yedekParam = searchParams.get('yedek')
     const sadeceArsivExport = arsivParam === 'true'
+    const sadeceYedekExport = yedekParam === 'true'
 
     // Admin kullanıcısının şubesine göre filtreleme
     const kurumSube = session.user.kurumSube
@@ -110,13 +117,32 @@ export async function GET(request: Request) {
       }
     }
 
-    basvurular = basvurular.filter((b) => {
-      const arsiv = typeof b.arsivlendi === 'boolean' ? b.arsivlendi : false
-      return sadeceArsivExport ? arsiv : !arsiv
-    })
+    basvurular = basvurular
+      .filter((b) => basvuruSubeEslesir(b, kurumSube))
+      .filter((b) => {
+        const kayit = { ...b, arsivlendi: typeof b.arsivlendi === 'boolean' ? b.arsivlendi : false }
+        if (sadeceYedekExport) return yedekBasvurusu(kayit, kurumSube)
+        if (sadeceArsivExport) return arsivBasvurusu(kayit, kurumSube)
+        return anaListeBasvurusu(kayit, kurumSube)
+      })
 
-    const sheetAdi = sadeceArsivExport ? 'Arsiv Basvurular' : 'Ana Basvurular'
-    const dosyaOncelik = sadeceArsivExport ? 'arsiv-basvurular' : 'ana-basvurular'
+    if (kurumSube === 'Rize' && sinav) {
+      basvurular = basvurular.filter((b) => {
+        if (sinav === 'Belirtilmedi') return !b.sinavSecimi?.trim()
+        return b.sinavSecimi === sinav
+      })
+    }
+
+    const sheetAdi = sadeceYedekExport
+      ? 'Yedek Basvurular'
+      : sadeceArsivExport
+        ? 'Arsiv Basvurular'
+        : 'Ana Basvurular'
+    const dosyaOncelik = sadeceYedekExport
+      ? 'yedek-basvurular'
+      : sadeceArsivExport
+        ? 'arsiv-basvurular'
+        : 'ana-basvurular'
     const gun = new Date().toISOString().split('T')[0]
 
     // Excel için veriyi hazırla

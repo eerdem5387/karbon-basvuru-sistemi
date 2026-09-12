@@ -33,34 +33,16 @@ export default function AdminDashboard() {
   // Rize: sınava göre başvuru sayıları
   const sinavBasvuruSayilari = useMemo(() => {
     if (!isRize) return []
-    const counts: { sinav: string; count: number }[] = []
     const map = new Map<string, number>()
     for (const b of basvurular) {
-      const key = b.sinavSecimi?.trim() || 'Belirtilmedi'
+      const key = b.sinavSecimi?.trim()
+      if (!key) continue
       map.set(key, (map.get(key) ?? 0) + 1)
     }
-    // Tanımlı sınavlar (şu an aktif olan seçenekler)
-    rizeSinavSecenekleri.forEach((s) => {
-      const count = map.get(s) ?? 0
-      if (count > 0) counts.push({ sinav: s, count })
-    })
-
-    // Belirtilmemiş sınavlar
-    const belirtilmedi = map.get('Belirtilmedi') ?? 0
-    if (belirtilmedi > 0) counts.push({ sinav: 'Belirtilmedi', count: belirtilmedi })
-
-    // Eski / tanımsız sınav adları (ör. artık listede olmayan 7 Şubat sınavları)
-    const knownSinavlar = new Set<string>([
-      ...rizeSinavSecenekleri,
-      'Belirtilmedi',
-    ])
-    for (const [key, value] of map.entries()) {
-      if (!knownSinavlar.has(key) && value > 0) {
-        counts.push({ sinav: key, count: value })
-      }
-    }
-
-    return counts
+    return rizeSinavSecenekleri.map((sinav) => ({
+      sinav,
+      count: map.get(sinav) ?? 0,
+    }))
   }, [basvurular, isRize])
 
   useEffect(() => {
@@ -290,6 +272,22 @@ export default function AdminDashboard() {
               <p className="text-sm text-gray-600">Hoş geldiniz, {session?.user?.name}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+              {isRize && (
+                <Link
+                  href="/admin/yedek"
+                  className="bg-slate-600 text-white px-4 py-2 rounded-lg hover:bg-slate-700 transition duration-200 flex items-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+                    />
+                  </svg>
+                  <span>Yedek (eski sınavlar)</span>
+                </Link>
+              )}
               <Link
                 href="/admin/arsiv"
                 className="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700 transition duration-200 flex items-center space-x-2"
@@ -550,7 +548,6 @@ export default function AdminDashboard() {
                           {sinav}
                         </option>
                       ))}
-                      <option value="Belirtilmedi">Belirtilmedi</option>
                     </select>
                   </div>
                 )}

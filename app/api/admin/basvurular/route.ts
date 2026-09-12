@@ -2,6 +2,12 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { findManyBasvuruForAdminApi } from "@/lib/basvuru-arsiv-db"
+import {
+  anaListeBasvurusu,
+  arsivBasvurusu,
+  basvuruSubeEslesir,
+  yedekBasvurusu,
+} from "@/lib/admin-basvuru-filter"
 
 export async function GET(request: Request) {
   try {
@@ -28,7 +34,9 @@ export async function GET(request: Request) {
     
     console.log('[Admin API] Kurum Şube:', kurumSube)
 
-    const arsivOnly = new URL(request.url).searchParams.get('arsiv') === 'true'
+    const params = new URL(request.url).searchParams
+    const arsivOnly = params.get('arsiv') === 'true'
+    const yedekOnly = params.get('yedek') === 'true'
 
     // Önce tüm başvuruları say
     const toplamBasvuru = await prisma.basvuru.count()
@@ -39,29 +47,19 @@ export async function GET(request: Request) {
     
     console.log('[Admin API] Tüm başvuru sayısı:', tumBasvurular.length)
     
-    // JavaScript'te filtrele (daha güvenli)
-    const okulArama = kurumSube === 'Rize' ? 'RİZE' : 'TRABZON'
-    const basvurular = tumBasvurular.filter(b => {
-      // KurumSube eşleşiyorsa göster
-      if (b.kurumSube === kurumSube) {
-        return true
-      }
-      // Okul adında şube adı geçiyorsa göster (eski başvurular için)
-      if (b.okul && b.okul.toUpperCase().includes(okulArama)) {
-        return true
-      }
-      return false
-    })
-    
-    const basvurularArsivAyrimli = basvurular.filter((b) => {
-      const arsiv = Boolean((b as { arsivlendi?: boolean }).arsivlendi)
-      return arsivOnly ? arsiv : !arsiv
+    const basvurular = tumBasvurular.filter((b) => basvuruSubeEslesir(b, kurumSube))
+
+    const basvurularListelenen = basvurular.filter((b) => {
+      const kayit = { ...b, arsivlendi: Boolean((b as { arsivlendi?: boolean }).arsivlendi) }
+      if (yedekOnly) return yedekBasvurusu(kayit, kurumSube)
+      if (arsivOnly) return arsivBasvurusu(kayit, kurumSube)
+      return anaListeBasvurusu(kayit, kurumSube)
     })
 
-    console.log('[Admin API] Filtrelenmiş başvuru sayısı:', basvurularArsivAyrimli.length)
+    console.log('[Admin API] Filtrelenmiş başvuru sayısı:', basvurularListelenen.length)
     
     // Eski başvuruların kurumSube değerini güncelle (asenkron, kullanıcıyı bekletme)
-    const guncellenecekBasvurular = basvurularArsivAyrimli.filter(b => 
+    const guncellenecekBasvurular = basvurularListelenen.filter(b => 
       !b.kurumSube || b.kurumSube === '' || b.kurumSube === 'Belirtilmedi'
     )
     
@@ -84,7 +82,7 @@ export async function GET(request: Request) {
       })
     }
     
-    return NextResponse.json(basvurularArsivAyrimli, {
+    return NextResponse.json(basvurularListelenen, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
         'Pragma': 'no-cache',
