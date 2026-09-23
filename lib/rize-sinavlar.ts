@@ -22,13 +22,6 @@ export const rizeAktifSinavlar: readonly RizeSinavTanim[] = [
     yer: "Sağlık Bilimleri Fakültesi",
     siniflar: ["11. Sınıf"],
   },
-  {
-    metin: "Türkiye Geneli Lgs Hazır bulunuşluk sınavı",
-    tarih: "10 Ekim Cumartesi",
-    saat: "10.00",
-    yer: "Sağlık Bilimleri Fakültesi",
-    siniflar: ["8. Sınıf"],
-  },
 ] as const
 
 export const rizeSinavSecenekleri = rizeAktifSinavlar.map((s) => s.metin)
